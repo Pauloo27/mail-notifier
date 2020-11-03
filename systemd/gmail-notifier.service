@@ -1,0 +1,14 @@
+[Unit]
+Description=Fetch gmail unread messages
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/gmail-notifier
+#ExecStop=
+PIDFile=/tmp/gmail-notifier.pid
+WorkingDirectory=/home/paulo/Programming/Workspace/GoLang/src/gmail-notifier
+User=paulo
+
+[Install]
+WantedBy=network-online.target
