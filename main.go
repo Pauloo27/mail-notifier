@@ -98,11 +98,11 @@ func main() {
 			if err == nil {
 				status := strings.Split(string(buffer), "\n")
 				if status[0] != "0" {
-					fmt.Printf("%%{u#ffb86c}%s unread messages%%{u-}\n", status[0])
+					fmt.Printf("%%{u#ffb86c} %s%%{u-}\n", status[0])
 					return
 				}
 			}
-			fmt.Printf("%%{u#50fa7b}No unread messages%%{u-}\n")
+			fmt.Printf("%%{u#50fa7b} 0%%{u-}\n")
 			return
 		}
 	}
