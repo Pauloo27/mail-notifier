@@ -1,5 +1,5 @@
-compile:
+build:
 		go build
 
-run: compile
+run: build
 	./gmail-notifier
