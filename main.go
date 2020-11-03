@@ -16,6 +16,7 @@ import (
 )
 
 const statusFile = "/dev/shm/gmail-status.txt"
+const clientCount = 2
 
 func fetchMessages(srv *gmail.Service) []*gmail.Message {
 	r, err := srv.Users.Messages.List("me").LabelIds("UNREAD").IncludeSpamTrash(true).MaxResults(10).Do()
@@ -26,10 +27,14 @@ func fetchMessages(srv *gmail.Service) []*gmail.Message {
 	return r.Messages
 }
 
-func logStatus(unreadCount int) {
+func logStatus(status []int) {
 	now := time.Now()
 	timestamp := fmt.Sprintf("Checked at %s", now.Format("Mon, 2 Jan • 15:04"))
-	data := []byte(fmt.Sprintf("%d\n%s\n", unreadCount, timestamp))
+	unreadCount := ""
+	for _, unread := range status {
+		unreadCount += fmt.Sprintf("%d ", unread)
+	}
+	data := []byte(fmt.Sprintf("%s\n%s\n", strings.TrimSuffix(unreadCount, " "), timestamp))
 	err := ioutil.WriteFile(statusFile, data, 0644)
 	if err != nil {
 		log.Fatalf("Cannot write file %s: %v", statusFile, err)
@@ -44,34 +49,54 @@ func runDaemon(askLogin bool) {
 
 	secretFolder := usr.HomeDir + "/.cache/gmail-notifier/secret/"
 	credentialsFile := secretFolder + "credentials.json"
-	tokFile := secretFolder + "token.json"
 
-	b, err := ioutil.ReadFile(credentialsFile)
-	if err != nil {
-		log.Fatalf("Unable to read client secret file: %v", err)
-	}
+	services := []*gmail.Service{}
 
-	config, err := google.ConfigFromJSON(b, gmail.GmailReadonlyScope)
-	if err != nil {
-		log.Fatalf("Unable to parse client secret file to config: %v", err)
-	}
+	for i := 0; i < clientCount; i++ {
+		tokFile := fmt.Sprintf("%stoken-%d.json", secretFolder, i)
 
-	client := gapi.GetClient(config, tokFile, askLogin)
+		b, err := ioutil.ReadFile(credentialsFile)
+		if err != nil {
+			log.Fatalf("Unable to read client secret file: %v", err)
+		}
 
-	srv, err := gmail.New(client)
-	if err != nil {
-		log.Fatalf("Unable to retrieve Gmail client: %v", err)
+		config, err := google.ConfigFromJSON(b, gmail.GmailReadonlyScope)
+		if err != nil {
+			log.Fatalf("Unable to parse client secret file to config: %v", err)
+		}
+
+		client := gapi.GetClient(config, tokFile, askLogin)
+
+		srv, err := gmail.New(client)
+		if err != nil {
+			log.Fatalf("Unable to retrieve Gmail client: %v", err)
+		}
+
+		services = append(services, srv)
 	}
 
 	fmt.Printf("Started. Logging status to %s\n", statusFile)
 
 	for {
-		messages := fetchMessages(srv)
-		messageCount := len(messages)
-		logStatus(messageCount)
+		status := []int{}
+		for _, srv := range services {
+			messages := fetchMessages(srv)
+			messageCount := len(messages)
+			status = append(status, messageCount)
 
-		time.Sleep(1 * time.Minute)
+		}
+		logStatus(status)
+		time.Sleep(5 * time.Minute)
 	}
+}
+
+type PolybarActionButton struct {
+	Index            uint
+	Display, Command string
+}
+
+func (a PolybarActionButton) String() string {
+	return fmt.Sprintf("%%{A%d:%s:}%s%%{A}", a.Index, a.Command, a.Display)
 }
 
 func main() {
@@ -95,16 +120,20 @@ func main() {
 			return
 		case "polybar":
 			color := "#50fa7b"
-			unread := "0"
+			buttons := []string{}
 			buffer, err := ioutil.ReadFile(statusFile)
 			if err == nil {
-				status := strings.Split(string(buffer), "\n")
-				unread = status[0]
-				if unread != "0" {
-					color = "#ffb86c"
+				status := strings.Split(strings.Split(string(buffer), "\n")[0], " ")
+				for i, unread := range status {
+					btn := PolybarActionButton{
+						1,
+						fmt.Sprintf(" %d: %s", i, unread),
+						fmt.Sprintf("brave https\\://mail.google.com/mail/u/%d", i),
+					}
+					buttons = append(buttons, btn.String())
 				}
 			}
-			fmt.Printf("%%{A1:brave https\\://mail.google.com/mail/u/0 &:}%%{u%s} %s%%{u-}%%{A}\n", color, unread)
+			fmt.Printf("%%{u%s}%s%%{u-}", color, strings.Join(buttons, " "))
 			return
 		}
 	}

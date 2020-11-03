@@ -20,13 +20,15 @@ func GetClient(config *oauth2.Config, tokFile string, askLogin bool) *http.Clien
 			log.Fatalf("If you are not logged, run `gmail-notifier login`.\nCannot init client: %v", err)
 		}
 	}
+	if askLogin {
+		os.Exit(0)
+	}
 	return config.Client(context.Background(), tok)
 }
 
 func Login(config *oauth2.Config, tokFile string) {
 	tok := getTokenFromWeb(config)
 	saveToken(tokFile, tok)
-	os.Exit(0)
 }
 
 func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
