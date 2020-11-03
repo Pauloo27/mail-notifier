@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/Pauloo27/gmail-notifier/gapi"
@@ -32,7 +34,7 @@ func logStatus(unreadCount int) {
 	}
 }
 
-func main() {
+func runDaemon() {
 	b, err := ioutil.ReadFile("secret/credentials.json")
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
@@ -58,4 +60,20 @@ func main() {
 
 		time.Sleep(1 * time.Minute)
 	}
+}
+
+func main() {
+	if len(os.Args) == 2 && os.Args[1] == "polybar" {
+		buffer, err := ioutil.ReadFile(statusFile)
+		if err == nil {
+			status := strings.Split(string(buffer), "\n")
+			if status[0] != "0" {
+				fmt.Printf("%%{u#ffb86c}%s unread messages%%{u-}\n", status[0])
+				return
+			}
+		}
+		fmt.Printf("%%{u#50fa7b}%s%%{u-}\n", "0 unread messages")
+		return
+	}
+	runDaemon()
 }
