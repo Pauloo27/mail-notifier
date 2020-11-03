@@ -94,15 +94,17 @@ func main() {
 			runDaemon(true)
 			return
 		case "polybar":
+			color := "#50fa7b"
+			unread := "0"
 			buffer, err := ioutil.ReadFile(statusFile)
 			if err == nil {
 				status := strings.Split(string(buffer), "\n")
-				if status[0] != "0" {
-					fmt.Printf("%%{u#ffb86c} %s%%{u-}\n", status[0])
-					return
+				unread = status[0]
+				if unread != "0" {
+					color = "#ffb86c"
 				}
 			}
-			fmt.Printf("%%{u#50fa7b} 0%%{u-}\n")
+			fmt.Printf("%%{A1:brave https\\://mail.google.com/mail/u/0 &:}%%{u%s} %s%%{u-}%%{A}\n", color, unread)
 			return
 		}
 	}
