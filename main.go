@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/user"
 	"strings"
 	"time"
 
@@ -34,8 +35,17 @@ func logStatus(unreadCount int) {
 	}
 }
 
-func runDaemon() {
-	b, err := ioutil.ReadFile("secret/credentials.json")
+func runDaemon(askLogin bool) {
+	usr, err := user.Current()
+	if err != nil {
+		log.Fatalf("Cannot get user: %v", err)
+	}
+
+	secretFolder := usr.HomeDir + "/.cache/gmail-notifier/secret/"
+	credentialsFile := secretFolder + "credentials.json"
+	tokFile := secretFolder + "token.json"
+
+	b, err := ioutil.ReadFile(credentialsFile)
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
 	}
@@ -44,7 +54,8 @@ func runDaemon() {
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
-	client := gapi.GetClient(config)
+
+	client := gapi.GetClient(config, tokFile, askLogin)
 
 	srv, err := gmail.New(client)
 	if err != nil {
@@ -63,17 +74,23 @@ func runDaemon() {
 }
 
 func main() {
-	if len(os.Args) == 2 && os.Args[1] == "polybar" {
-		buffer, err := ioutil.ReadFile(statusFile)
-		if err == nil {
-			status := strings.Split(string(buffer), "\n")
-			if status[0] != "0" {
-				fmt.Printf("%%{u#ffb86c}%s unread messages%%{u-}\n", status[0])
-				return
+	if len(os.Args) == 2 {
+		switch os.Args[1] {
+		case "login":
+			runDaemon(true)
+			return
+		case "polybar":
+			buffer, err := ioutil.ReadFile(statusFile)
+			if err == nil {
+				status := strings.Split(string(buffer), "\n")
+				if status[0] != "0" {
+					fmt.Printf("%%{u#ffb86c}%s unread messages%%{u-}\n", status[0])
+					return
+				}
 			}
+			fmt.Printf("%%{u#50fa7b}No unread messages%%{u-}\n")
+			return
 		}
-		fmt.Printf("%%{u#50fa7b}No unread messages%%{u-}\n")
-		return
 	}
-	runDaemon()
+	runDaemon(false)
 }

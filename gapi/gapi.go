@@ -11,14 +11,21 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func GetClient(config *oauth2.Config) *http.Client {
-	tokFile := "secret/token.json"
+func GetClient(config *oauth2.Config, tokFile string, askLogin bool) *http.Client {
 	tok, err := tokenFromFile(tokFile)
 	if err != nil {
-		tok = getTokenFromWeb(config)
-		saveToken(tokFile, tok)
+		if askLogin {
+			Login(config, tokFile)
+		} else {
+			log.Fatalf("If you are not logged, run `gmail-notifier login`.\nCannot init client: %v", err)
+		}
 	}
 	return config.Client(context.Background(), tok)
+}
+
+func Login(config *oauth2.Config, tokFile string) {
+	tok := getTokenFromWeb(config)
+	saveToken(tokFile, tok)
 }
 
 func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
