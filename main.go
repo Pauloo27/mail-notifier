@@ -1,67 +1,17 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net/http"
-	"os"
 	"time"
 
-	"golang.org/x/net/context"
-	"golang.org/x/oauth2"
+	"github.com/Pauloo27/gmail-notifier/gapi"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/gmail/v1"
 )
 
-func getClient(config *oauth2.Config) *http.Client {
-	tokFile := "secret/token.json"
-	tok, err := tokenFromFile(tokFile)
-	if err != nil {
-		tok = getTokenFromWeb(config)
-		saveToken(tokFile, tok)
-	}
-	return config.Client(context.Background(), tok)
-}
-
-func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
-	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-	fmt.Printf("Go to the following link in your browser then type the "+
-		"authorization code: \n%v\n", authURL)
-
-	var authCode string
-	if _, err := fmt.Scan(&authCode); err != nil {
-		log.Fatalf("Unable to read authorization code: %v", err)
-	}
-
-	tok, err := config.Exchange(context.TODO(), authCode)
-	if err != nil {
-		log.Fatalf("Unable to retrieve token from web: %v", err)
-	}
-	return tok
-}
-
-func tokenFromFile(file string) (*oauth2.Token, error) {
-	f, err := os.Open(file)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	tok := &oauth2.Token{}
-	err = json.NewDecoder(f).Decode(tok)
-	return tok, err
-}
-
-func saveToken(path string, token *oauth2.Token) {
-	fmt.Printf("Saving credential file to: %s\n", path)
-	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
-	if err != nil {
-		log.Fatalf("Unable to cache oauth token: %v", err)
-	}
-	defer f.Close()
-	json.NewEncoder(f).Encode(token)
-}
+const statusFile = "/dev/shm/gmail-status.txt"
 
 func fetchMessages(srv *gmail.Service) []*gmail.Message {
 	r, err := srv.Users.Messages.List("me").LabelIds("UNREAD").IncludeSpamTrash(true).MaxResults(10).Do()
@@ -70,6 +20,16 @@ func fetchMessages(srv *gmail.Service) []*gmail.Message {
 	}
 
 	return r.Messages
+}
+
+func logStatus(unreadCount int) {
+	now := time.Now()
+	timestamp := fmt.Sprintf("Checked at %s", now.Format("Mon, 2 Jan • 15:04"))
+	data := []byte(fmt.Sprintf("%d\n%s\n", unreadCount, timestamp))
+	err := ioutil.WriteFile(statusFile, data, 0644)
+	if err != nil {
+		log.Fatalf("Cannot write file %s: %v", statusFile, err)
+	}
 }
 
 func main() {
@@ -82,27 +42,19 @@ func main() {
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
-	client := getClient(config)
+	client := gapi.GetClient(config)
 
 	srv, err := gmail.New(client)
 	if err != nil {
 		log.Fatalf("Unable to retrieve Gmail client: %v", err)
 	}
 
-	// check loop
-	unreadMessages = []*gmail.Message{}
+	fmt.Printf("Started. Logging status to %s\n", statusFile)
 
 	for {
 		messages := fetchMessages(srv)
-		if len(messages) == 0 {
-			fmt.Println("All messages read!")
-		} else {
-			fmt.Println("Unread messages:")
-			for _, msg := range messages {
-				fmt.Printf(" - %s: %s\n", msg.Id)
-			}
-			unreadMessages = messages
-		}
+		messageCount := len(messages)
+		logStatus(messageCount)
 
 		time.Sleep(1 * time.Minute)
 	}
