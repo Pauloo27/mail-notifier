@@ -72,7 +72,7 @@ func main() {
 				return
 			}
 		}
-		fmt.Printf("%%{u#50fa7b}%s%%{u-}\n", "0 unread messages")
+		fmt.Printf("%%{u#50fa7b}No unread messages%%{u-}\n")
 		return
 	}
 	runDaemon()
