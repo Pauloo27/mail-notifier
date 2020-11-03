@@ -4,9 +4,8 @@ After=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/gmail-notifier
-#ExecStop=
-PIDFile=/tmp/gmail-notifier.pid
+ExecStart=/usr/bin/gmail-notifier start
+ExecStop=/usr/bin/gmail-notifier stop
 WorkingDirectory=/home/paulo/Programming/Workspace/GoLang/src/gmail-notifier
 User=paulo
 
