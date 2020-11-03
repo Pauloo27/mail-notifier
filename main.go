@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"os/user"
 	"strings"
 	"time"
@@ -76,6 +77,19 @@ func runDaemon(askLogin bool) {
 func main() {
 	if len(os.Args) == 2 {
 		switch os.Args[1] {
+		case "start":
+			runDaemon(false)
+		case "stop":
+			out, err := exec.Command("pgrep", "-f", "gmail-notifier start").Output()
+			if err != nil {
+				log.Fatalf("Cannot find daemon process: %v", err)
+			}
+			pid := strings.TrimSuffix(string(out), "\n")
+			err = exec.Command("kill", pid).Run()
+			if err != nil {
+				log.Fatalf("Cannot kill daemon process: %v", err)
+			}
+			return
 		case "login":
 			runDaemon(true)
 			return
@@ -92,5 +106,5 @@ func main() {
 			return
 		}
 	}
-	runDaemon(false)
+	fmt.Println("Invalid operation. Operations: start, stop, login, polybar")
 }

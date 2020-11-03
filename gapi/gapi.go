@@ -26,6 +26,7 @@ func GetClient(config *oauth2.Config, tokFile string, askLogin bool) *http.Clien
 func Login(config *oauth2.Config, tokFile string) {
 	tok := getTokenFromWeb(config)
 	saveToken(tokFile, tok)
+	os.Exit(0)
 }
 
 func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
