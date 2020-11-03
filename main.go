@@ -86,7 +86,7 @@ func runDaemon(askLogin bool) {
 
 		}
 		logStatus(status)
-		time.Sleep(5 * time.Minute)
+		time.Sleep(1 * time.Minute)
 	}
 }
 
