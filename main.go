@@ -127,7 +127,7 @@ func main() {
 				for i, unread := range status {
 					btn := PolybarActionButton{
 						1,
-						fmt.Sprintf(" %d: %s", i, unread),
+						fmt.Sprintf(": %s", unread),
 						fmt.Sprintf("brave https\\://mail.google.com/mail/u/%d &", i),
 					}
 					buttons = append(buttons, btn.String())
