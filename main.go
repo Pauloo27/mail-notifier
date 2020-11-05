@@ -15,7 +15,6 @@ import (
 	"google.golang.org/api/gmail/v1"
 )
 
-const statusFile = "/dev/shm/gmail-status.txt"
 const clientCount = 2
 
 func fetchMessages(srv *gmail.Service) []*gmail.Message {
@@ -25,20 +24,6 @@ func fetchMessages(srv *gmail.Service) []*gmail.Message {
 	}
 
 	return r.Messages
-}
-
-func logStatus(status []int) {
-	now := time.Now()
-	timestamp := fmt.Sprintf("Checked at %s", now.Format("Mon, 2 Jan • 15:04"))
-	unreadCount := ""
-	for _, unread := range status {
-		unreadCount += fmt.Sprintf("%d ", unread)
-	}
-	data := []byte(fmt.Sprintf("%s\n%s\n", strings.TrimSuffix(unreadCount, " "), timestamp))
-	err := ioutil.WriteFile(statusFile, data, 0644)
-	if err != nil {
-		utils.HandleFatal("Cannot write file "+statusFile, err)
-	}
 }
 
 func runDaemon(askLogin bool) {
@@ -75,7 +60,7 @@ func runDaemon(askLogin bool) {
 		services = append(services, srv)
 	}
 
-	fmt.Printf("Started. Logging status to %s\n", statusFile)
+	fmt.Printf("Started. Logging status to %s\n", utils.StatusFile)
 
 	for {
 		status := []int{}
@@ -85,8 +70,8 @@ func runDaemon(askLogin bool) {
 			status = append(status, messageCount)
 
 		}
-		logStatus(status)
-		time.Sleep(1 * time.Minute)
+		utils.LogStatus(status)
+		time.Sleep(3 * time.Minute)
 	}
 }
 
@@ -120,21 +105,32 @@ func main() {
 			return
 		case "polybar":
 			buttons := []string{}
-			buffer, err := ioutil.ReadFile(statusFile)
+			buffer, err := ioutil.ReadFile(utils.StatusFile)
 			color := "#50fa7b"
 
 			if err == nil {
-				status := strings.Split(strings.Split(string(buffer), "\n")[0], " ")
-				for i, unread := range status {
-					if unread != "0" {
-						color = "#ffb86c"
-					}
+				statusLine := strings.Split(string(buffer), "\n")[0]
+				if statusLine == "-" {
+					color = "#ff5555"
 					btn := PolybarActionButton{
 						1,
-						fmt.Sprintf(": %s", unread),
-						fmt.Sprintf("brave https\\://mail.google.com/mail/u/%d &", i),
+						"Error",
+						"systemctl restart gmail-notifier",
 					}
 					buttons = append(buttons, btn.String())
+				} else {
+					statusList := strings.Split(statusLine, " ")
+					for i, unread := range statusList {
+						if unread != "0" {
+							color = "#ffb86c"
+						}
+						btn := PolybarActionButton{
+							1,
+							fmt.Sprintf(": %s", unread),
+							fmt.Sprintf("brave https\\://mail.google.com/mail/u/%d &", i),
+						}
+						buttons = append(buttons, btn.String())
+					}
 				}
 			}
 			fmt.Printf("%%{u%s}%s%%{u-}", color, strings.Join(buttons, " "))
