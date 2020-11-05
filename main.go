@@ -64,13 +64,14 @@ func runDaemon(askLogin bool) {
 
 	for {
 		status := []int{}
+		fmt.Println("Fetching...")
 		for _, srv := range services {
 			messages := fetchMessages(srv)
 			messageCount := len(messages)
 			status = append(status, messageCount)
-
 		}
 		utils.LogStatus(status)
+		fmt.Printf("Found %d\n", status)
 		time.Sleep(3 * time.Minute)
 	}
 }
