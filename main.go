@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"os/user"
@@ -11,6 +10,7 @@ import (
 	"time"
 
 	"github.com/Pauloo27/gmail-notifier/gapi"
+	"github.com/Pauloo27/gmail-notifier/utils"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/gmail/v1"
 )
@@ -21,7 +21,7 @@ const clientCount = 2
 func fetchMessages(srv *gmail.Service) []*gmail.Message {
 	r, err := srv.Users.Messages.List("me").LabelIds("UNREAD").IncludeSpamTrash(true).MaxResults(10).Do()
 	if err != nil {
-		log.Fatalf("Unable to retrieve messages: %v", err)
+		utils.HandleFatal("Unable to retrieve message", err)
 	}
 
 	return r.Messages
@@ -37,14 +37,14 @@ func logStatus(status []int) {
 	data := []byte(fmt.Sprintf("%s\n%s\n", strings.TrimSuffix(unreadCount, " "), timestamp))
 	err := ioutil.WriteFile(statusFile, data, 0644)
 	if err != nil {
-		log.Fatalf("Cannot write file %s: %v", statusFile, err)
+		utils.HandleFatal("Cannot write file "+statusFile, err)
 	}
 }
 
 func runDaemon(askLogin bool) {
 	usr, err := user.Current()
 	if err != nil {
-		log.Fatalf("Cannot get user: %v", err)
+		utils.HandleFatal("Cannot get user", err)
 	}
 
 	secretFolder := usr.HomeDir + "/.cache/gmail-notifier/secret/"
@@ -57,19 +57,19 @@ func runDaemon(askLogin bool) {
 
 		b, err := ioutil.ReadFile(credentialsFile)
 		if err != nil {
-			log.Fatalf("Unable to read client secret file: %v", err)
+			utils.HandleFatal("Unable to read client secret file", err)
 		}
 
 		config, err := google.ConfigFromJSON(b, gmail.GmailReadonlyScope)
 		if err != nil {
-			log.Fatalf("Unable to parse client secret file to config: %v", err)
+			utils.HandleFatal("Unable to parse client secret file to config", err)
 		}
 
 		client := gapi.GetClient(config, tokFile, askLogin)
 
 		srv, err := gmail.New(client)
 		if err != nil {
-			log.Fatalf("Unable to retrieve Gmail client: %v", err)
+			utils.HandleFatal("Unable to retrieve Gmail client", err)
 		}
 
 		services = append(services, srv)
@@ -107,24 +107,28 @@ func main() {
 		case "stop":
 			out, err := exec.Command("pgrep", "-f", "gmail-notifier start").Output()
 			if err != nil {
-				log.Fatalf("Cannot find daemon process: %v", err)
+				utils.HandleFatal("Cannot find daemon process", err)
 			}
 			pid := strings.TrimSuffix(string(out), "\n")
 			err = exec.Command("kill", pid).Run()
 			if err != nil {
-				log.Fatalf("Cannot kill daemon process: %v", err)
+				utils.HandleFatal("Cannot kill daemon process", err)
 			}
 			return
 		case "login":
 			runDaemon(true)
 			return
 		case "polybar":
-			color := "#50fa7b"
 			buttons := []string{}
 			buffer, err := ioutil.ReadFile(statusFile)
+			color := "#50fa7b"
+
 			if err == nil {
 				status := strings.Split(strings.Split(string(buffer), "\n")[0], " ")
 				for i, unread := range status {
+					if unread != "0" {
+						color = "#ffb86c"
+					}
 					btn := PolybarActionButton{
 						1,
 						fmt.Sprintf(": %s", unread),

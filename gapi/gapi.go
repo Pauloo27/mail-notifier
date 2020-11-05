@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
+	"github.com/Pauloo27/gmail-notifier/utils"
 	"golang.org/x/oauth2"
 )
 
@@ -17,7 +17,7 @@ func GetClient(config *oauth2.Config, tokFile string, askLogin bool) *http.Clien
 		if askLogin {
 			Login(config, tokFile)
 		} else {
-			log.Fatalf("If you are not logged, run `gmail-notifier login`.\nCannot init client: %v", err)
+			utils.HandleFatal("If you are not logged, run `gmail-notifier login`.\nCannot init client", err)
 		}
 	}
 	if askLogin {
@@ -38,12 +38,12 @@ func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
 
 	var authCode string
 	if _, err := fmt.Scan(&authCode); err != nil {
-		log.Fatalf("Unable to read authorization code: %v", err)
+		utils.HandleFatal("Unable to read authorization code", err)
 	}
 
 	tok, err := config.Exchange(context.TODO(), authCode)
 	if err != nil {
-		log.Fatalf("Unable to retrieve token from web: %v", err)
+		utils.HandleFatal("Unable to retrieve token from web", err)
 	}
 	return tok
 }
@@ -63,7 +63,7 @@ func saveToken(path string, token *oauth2.Token) {
 	fmt.Printf("Saving credential file to: %s\n", path)
 	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		log.Fatalf("Unable to cache oauth token: %v", err)
+		utils.HandleFatal("Unable to cache oauth token", err)
 	}
 	defer f.Close()
 	json.NewEncoder(f).Encode(token)
