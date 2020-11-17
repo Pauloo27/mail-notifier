@@ -17,7 +17,7 @@ func GetClient(config *oauth2.Config, tokFile string, askLogin bool) *http.Clien
 		if askLogin {
 			Login(config, tokFile)
 		} else {
-			utils.HandleFatal("If you are not logged, run `gmail-notifier login`.\nCannot init client", err)
+			utils.HandleFatal("run `gmail-notifier login`. Error:", err)
 		}
 	}
 	if askLogin {
