@@ -12,6 +12,7 @@ const StatusFile = "/dev/shm/gmail-status.txt"
 
 func HandleFatal(message string, err error) {
 	if err != nil {
+		fmt.Println(message)
 		LogErrorStatus(message)
 		log.Fatalf("[FATAL]: %s: %v", message, err)
 	}

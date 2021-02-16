@@ -20,9 +20,6 @@ func GetClient(config *oauth2.Config, tokFile string, askLogin bool) *http.Clien
 			utils.HandleFatal("run `gmail-notifier login`. Error:", err)
 		}
 	}
-	if askLogin {
-		os.Exit(0)
-	}
 	return config.Client(context.Background(), tok)
 }
 

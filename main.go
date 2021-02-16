@@ -15,7 +15,7 @@ import (
 	"google.golang.org/api/gmail/v1"
 )
 
-const clientCount = 2
+const clientCount = 3
 
 func fetchMessages(srv *gmail.Service) []*gmail.Message {
 	r, err := srv.Users.Messages.List("me").LabelIds("UNREAD").IncludeSpamTrash(true).MaxResults(10).Do()
@@ -38,6 +38,7 @@ func runDaemon(askLogin bool) {
 	services := []*gmail.Service{}
 
 	for i := 0; i < clientCount; i++ {
+		fmt.Println("Loading client", i)
 		tokFile := fmt.Sprintf("%stoken-%d.json", secretFolder, i)
 
 		b, err := ioutil.ReadFile(credentialsFile)
@@ -51,6 +52,7 @@ func runDaemon(askLogin bool) {
 		}
 
 		client := gapi.GetClient(config, tokFile, askLogin)
+		fmt.Printf("Client %d loaded\n", i)
 
 		srv, err := gmail.New(client)
 		if err != nil {
