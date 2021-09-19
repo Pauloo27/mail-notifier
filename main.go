@@ -35,7 +35,7 @@ func runDaemon(askLogin bool) {
 	secretFolder := usr.HomeDir + "/.cache/gmail-notifier/secret/gmail"
 	credentialsFile := secretFolder + "credentials.json"
 
-	services := []*gmail.Service{}
+	gmailServices := []*gmail.Service{}
 
 	for i := 0; i < clientCount; i++ {
 		fmt.Println("Loading client", i)
@@ -59,7 +59,7 @@ func runDaemon(askLogin bool) {
 			utils.HandleFatal("Unable to retrieve Gmail client", err)
 		}
 
-		services = append(services, srv)
+		gmailServices = append(gmailServices, srv)
 	}
 
 	fmt.Printf("Started. Logging status to %s\n", utils.StatusFile)
@@ -67,7 +67,7 @@ func runDaemon(askLogin bool) {
 	for {
 		status := []int{}
 		fmt.Println("Fetching...")
-		for _, srv := range services {
+		for _, srv := range gmailServices {
 			messages := fetchMessages(srv)
 			messageCount := len(messages)
 			status = append(status, messageCount)

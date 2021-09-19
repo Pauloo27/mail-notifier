@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const StatusFile = "/dev/shm/gmail-status.txt"
+const StatusFile = "/dev/shm/mail-status.txt"
 
 func HandleFatal(message string, err error) {
 	if err != nil {
