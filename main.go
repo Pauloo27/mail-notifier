@@ -32,7 +32,7 @@ func runDaemon(askLogin bool) {
 		utils.HandleFatal("Cannot get user", err)
 	}
 
-	secretFolder := usr.HomeDir + "/.cache/gmail-notifier/secret/"
+	secretFolder := usr.HomeDir + "/.cache/gmail-notifier/secret/gmail"
 	credentialsFile := secretFolder + "credentials.json"
 
 	services := []*gmail.Service{}
