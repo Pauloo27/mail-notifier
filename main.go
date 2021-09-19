@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"github.com/Pauloo27/gmail-notifier/gapi"
+	"github.com/Pauloo27/gmail-notifier/mail"
 	"github.com/Pauloo27/gmail-notifier/utils"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/gmail/v1"
@@ -32,14 +34,16 @@ func runDaemon(askLogin bool) {
 		utils.HandleFatal("Cannot get user", err)
 	}
 
-	secretFolder := usr.HomeDir + "/.cache/gmail-notifier/secret/gmail/"
-	credentialsFile := secretFolder + "credentials.json"
+	secretFolder := usr.HomeDir + "/.cache/gmail-notifier/secret/"
+	gmailFolder := secretFolder + "gmail/"
+	credentialsFile := gmailFolder + "credentials.json"
+	mailServicesFile := secretFolder + "mails.json"
 
 	gmailServices := []*gmail.Service{}
 
 	for i := 0; i < clientCount; i++ {
 		fmt.Println("Loading client", i)
-		tokFile := fmt.Sprintf("%stoken-%d.json", secretFolder, i)
+		tokFile := fmt.Sprintf("%stoken-%d.json", gmailFolder, i)
 
 		b, err := ioutil.ReadFile(credentialsFile)
 		if err != nil {
@@ -62,6 +66,17 @@ func runDaemon(askLogin bool) {
 		gmailServices = append(gmailServices, srv)
 	}
 
+	b, err := ioutil.ReadFile(mailServicesFile)
+	if err != nil {
+		panic(err)
+	}
+	var mailServices []mail.Mail
+
+	err = json.Unmarshal(b, &mailServices)
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Printf("Started. Logging status to %s\n", utils.StatusFile)
 
 	for {
@@ -72,9 +87,13 @@ func runDaemon(askLogin bool) {
 			messageCount := len(messages)
 			status = append(status, messageCount)
 		}
+		for _, m := range mailServices {
+			messageCount := m.FetchMessages()
+			status = append(status, int(messageCount))
+		}
 		utils.LogStatus(status)
 		fmt.Printf("Found %d\n", status)
-		time.Sleep(3 * time.Minute)
+		time.Sleep(5 * time.Minute)
 	}
 }
 
