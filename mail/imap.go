@@ -3,6 +3,7 @@ package mail
 import (
 	"fmt"
 
+	"github.com/Pauloo27/gmail-notifier/utils"
 	"github.com/emersion/go-imap/client"
 )
 
@@ -13,17 +14,13 @@ type Mail struct {
 
 func (m *Mail) FetchMessages() uint32 {
 	c, err := client.DialTLS(fmt.Sprintf("%s:%d", m.Host, m.Port), nil)
-	if err != nil {
-		panic(err)
-	}
+	utils.HandleFatal("Cannot connect to imap host", err)
 	defer c.Logout()
 	if err := c.Login(m.Username, m.Password); err != nil {
-		panic(err)
+		utils.HandleFatal("Cannot login into imap host", err)
 	}
 
 	mbox, err := c.Select("INBOX", true)
-	if err != nil {
-		panic(err)
-	}
+	utils.HandleFatal("Cannot get INBOX mailbox", err)
 	return mbox.Unseen
 }

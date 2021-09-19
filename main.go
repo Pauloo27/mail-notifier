@@ -21,18 +21,14 @@ const clientCount = 3
 
 func fetchMessages(srv *gmail.Service) []*gmail.Message {
 	r, err := srv.Users.Messages.List("me").LabelIds("UNREAD").IncludeSpamTrash(true).MaxResults(10).Do()
-	if err != nil {
-		utils.HandleFatal("Unable to retrieve message", err)
-	}
+	utils.HandleFatal("Unable to retrieve message", err)
 
 	return r.Messages
 }
 
 func runDaemon(askLogin bool) {
 	usr, err := user.Current()
-	if err != nil {
-		utils.HandleFatal("Cannot get user", err)
-	}
+	utils.HandleFatal("Cannot get user", err)
 
 	secretFolder := usr.HomeDir + "/.cache/gmail-notifier/secret/"
 	gmailFolder := secretFolder + "gmail/"
@@ -46,36 +42,27 @@ func runDaemon(askLogin bool) {
 		tokFile := fmt.Sprintf("%stoken-%d.json", gmailFolder, i)
 
 		b, err := ioutil.ReadFile(credentialsFile)
-		if err != nil {
-			utils.HandleFatal("Unable to read client secret file", err)
-		}
+		utils.HandleFatal("Unable to read client secret file", err)
 
 		config, err := google.ConfigFromJSON(b, gmail.GmailReadonlyScope)
-		if err != nil {
-			utils.HandleFatal("Unable to parse client secret file to config", err)
-		}
+		utils.HandleFatal("Unable to parse client secret file to config", err)
 
 		client := gapi.GetClient(config, tokFile, askLogin)
 		fmt.Printf("Client %d loaded\n", i)
 
 		srv, err := gmail.New(client)
-		if err != nil {
-			utils.HandleFatal("Unable to retrieve Gmail client", err)
-		}
+		utils.HandleFatal("Unable to retrieve Gmail client", err)
 
 		gmailServices = append(gmailServices, srv)
 	}
 
 	b, err := ioutil.ReadFile(mailServicesFile)
-	if err != nil {
-		panic(err)
-	}
+	utils.HandleFatal("Cannot read mail services file", err)
+
 	var mailServices []mail.Mail
 
 	err = json.Unmarshal(b, &mailServices)
-	if err != nil {
-		panic(err)
-	}
+	utils.HandleFatal("Cannot parse json mail service file", err)
 
 	fmt.Printf("Started. Logging status to %s\n", utils.StatusFile)
 
@@ -113,14 +100,11 @@ func main() {
 			runDaemon(false)
 		case "stop":
 			out, err := exec.Command("pgrep", "-f", "gmail-notifier start").Output()
-			if err != nil {
-				utils.HandleFatal("Cannot find daemon process", err)
-			}
+			utils.HandleFatal("Cannot find daemon process", err)
+
 			pid := strings.TrimSuffix(string(out), "\n")
 			err = exec.Command("kill", pid).Run()
-			if err != nil {
-				utils.HandleFatal("Cannot kill daemon process", err)
-			}
+			utils.HandleFatal("Cannot kill daemon process", err)
 			return
 		case "login":
 			runDaemon(true)
@@ -146,10 +130,16 @@ func main() {
 						if unread != "0" {
 							color = "#ffb86c"
 						}
+
+						command := fmt.Sprintf("brave https\\://mail.google.com/mail/u/%d &", i)
+						if i >= clientCount {
+							command = "brave https\\://mail.notagovernment.agency/ &"
+						}
+
 						btn := PolybarActionButton{
 							1,
 							fmt.Sprintf(": %s", unread),
-							fmt.Sprintf("brave https\\://mail.google.com/mail/u/%d &", i),
+							command,
 						}
 						buttons = append(buttons, btn.String())
 					}
