@@ -76,11 +76,11 @@ func runDaemon(askLogin bool) {
 		}
 		for _, m := range mailServices {
 			messageCount := m.FetchMessages()
-			status = append(status, int(messageCount))
+			status = append(status, messageCount)
 		}
 		utils.LogStatus(status)
 		fmt.Printf("Found %d\n", status)
-		time.Sleep(5 * time.Minute)
+		time.Sleep(1 * time.Minute)
 	}
 }
 

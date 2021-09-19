@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Pauloo27/gmail-notifier/utils"
+	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
 )
 
@@ -12,7 +13,7 @@ type Mail struct {
 	Port                     int
 }
 
-func (m *Mail) FetchMessages() uint32 {
+func (m *Mail) FetchMessages() int {
 	c, err := client.DialTLS(fmt.Sprintf("%s:%d", m.Host, m.Port), nil)
 	utils.HandleFatal("Cannot connect to imap host", err)
 	defer c.Logout()
@@ -20,7 +21,14 @@ func (m *Mail) FetchMessages() uint32 {
 		utils.HandleFatal("Cannot login into imap host", err)
 	}
 
-	mbox, err := c.Select("INBOX", true)
-	utils.HandleFatal("Cannot get INBOX mailbox", err)
-	return mbox.Unseen
+	criteria := imap.NewSearchCriteria()
+	criteria.WithoutFlags = []string{imap.SeenFlag}
+
+	_, err = c.Select("INBOX", true)
+	utils.HandleFatal("Cannot select inbox", err)
+
+	ids, err := c.Search(criteria)
+	utils.HandleFatal("Cannot search for unseen", err)
+
+	return len(ids)
 }
