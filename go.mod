@@ -1,10 +1,3 @@
-module github.com/Pauloo27/gmail-notifier
+module github.com/Pauloo27/mail-notifier
 
-go 1.15
-
-require (
-	github.com/emersion/go-imap v1.1.0
-	golang.org/x/net v0.0.0-20201029221708-28c70e62bb1d // indirect
-	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
-	google.golang.org/api v0.34.0
-)
+go 1.17

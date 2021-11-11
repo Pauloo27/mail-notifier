@@ -1,8 +1,16 @@
+BINARY_NAME = mail-notifier
+
 build:
-		go build -v
+	go build -v
 
 run: build
-	./gmail-notifier start
+	./$(BINARY_NAME) 
+
+install: build
+	sudo cp ./$(BINARY_NAME) /usr/bin/
+
+tidy:
+	go mod tidy
 
 # (build but with a smaller binary)
 dist:
@@ -10,5 +18,4 @@ dist:
 
 # (even smaller binary)
 pack: dist
-	upx ./gmail-notifier
-
+	upx ./$(BINARY_NAME)
