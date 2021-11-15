@@ -13,9 +13,9 @@ type Gmail struct {
 	Service *gmail.Service
 }
 
-func (m *Gmail) FetchMessages(maxMessages uint32, onlyUnRead bool) (ids []string, count int, err error) {
+func (m *Gmail) FetchMessages(maxMessages uint32, onlyUnread bool) (ids []string, count int, err error) {
 	query := m.Service.Users.Messages.List("me").IncludeSpamTrash(true).MaxResults(int64(maxMessages))
-	if onlyUnRead {
+	if onlyUnread {
 		query.LabelIds("UNREAD")
 	}
 

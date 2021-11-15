@@ -38,10 +38,10 @@ func (m *Mail) Disconnect() error {
 	return m.client.Logout()
 }
 
-func (m *Mail) FetchMessages(maxMessages uint32, onlyUnRead bool) (ids []uint32, count int, err error) {
+func (m *Mail) FetchMessages(maxMessages uint32, onlyUnread bool) (ids []uint32, count int, err error) {
 	criteria := imap.NewSearchCriteria()
 
-	if onlyUnRead {
+	if onlyUnread {
 		criteria.WithoutFlags = []string{imap.SeenFlag}
 	}
 
