@@ -3,18 +3,12 @@ package gmail
 import (
 	"context"
 	"encoding/json"
-	"net/http"
 	"os"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/gmail/v1"
 )
-
-type Gmail struct {
-	Client *http.Client
-	Config *oauth2.Config
-}
 
 func NewGmail(credentialsFilePath string) (*Gmail, error) {
 	buf, err := os.ReadFile(credentialsFilePath)
@@ -56,6 +50,12 @@ func (m *Gmail) SaveTokenToFile(token *oauth2.Token, tokenFilePath string) error
 	return os.WriteFile(tokenFilePath, buf, 0600)
 }
 
-func (m *Gmail) LoginWithToken(token *oauth2.Token) {
+func (m *Gmail) LoginWithToken(token *oauth2.Token) error {
 	m.Client = m.Config.Client(context.Background(), token)
+	service, err := gmail.New(m.Client)
+	if err != nil {
+		return err
+	}
+	m.Service = service
+	return nil
 }
