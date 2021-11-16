@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/emersion/go-imap v1.2.0
+	github.com/gotk3/gotk3 v0.6.1
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	google.golang.org/api v0.30.0
 )

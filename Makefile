@@ -1,7 +1,10 @@
 BINARY_NAME = mail-notifier
 
 build:
-	go build -v
+	go build -o $(BINARY_NAME) -v ./gui
+
+dev:
+	fiber dev -r . -t ./gui
 
 run: build
 	./$(BINARY_NAME) 
