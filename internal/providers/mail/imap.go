@@ -10,11 +10,7 @@ import (
 	"github.com/emersion/go-imap/client"
 )
 
-func init() {
-	providers.Providers["imap"] = func(info map[string]interface{}) (providers.MailProvider, error) {
-		return NewMail(info["host"].(string), int(info["port"].(float64)), info["username"].(string), info["password"].(string))
-	}
-}
+var _ providers.MailProvider = Mail{}
 
 type Mail struct {
 	Host, Username, Password string
@@ -23,10 +19,20 @@ type Mail struct {
 	client *client.Client
 }
 
+func init() {
+	providers.Factories["imap"] = func(info map[string]interface{}) (providers.MailProvider, error) {
+		return NewMail(info["host"].(string), int(info["port"].(float64)), info["username"].(string), info["password"].(string))
+	}
+}
+
 func (m Mail) Connect() error {
 	c, err := client.DialTLS(fmt.Sprintf("%s:%d", m.Host, m.Port), nil)
 	m.client = c
 	return err
+}
+
+func (m Mail) GetAddress() string {
+	return m.Username // FIXME
 }
 
 func NewMail(host string, port int, username, password string) (Mail, error) {
