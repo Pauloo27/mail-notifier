@@ -2,6 +2,9 @@ package mail
 
 import (
 	"fmt"
+	"strconv"
+
+	"github.com/Pauloo27/mail-notifier/internal/providers"
 
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
@@ -14,14 +17,16 @@ type Mail struct {
 	client *client.Client
 }
 
-func (m *Mail) Connect() error {
+var _ providers.MailProvider = Mail{}
+
+func (m Mail) Connect() error {
 	c, err := client.DialTLS(fmt.Sprintf("%s:%d", m.Host, m.Port), nil)
 	m.client = c
 	return err
 }
 
-func NewMail(host string, port int, username, password string) (*Mail, error) {
-	m := &Mail{
+func NewMail(host string, port int, username, password string) (Mail, error) {
+	m := Mail{
 		Host:     host,
 		Port:     port,
 		Username: username,
@@ -34,11 +39,11 @@ func NewMail(host string, port int, username, password string) (*Mail, error) {
 	return m, err
 }
 
-func (m *Mail) Disconnect() error {
+func (m Mail) Disconnect() error {
 	return m.client.Logout()
 }
 
-func (m *Mail) FetchMessages(maxMessages uint32, onlyUnread bool) (ids []uint32, count int, err error) {
+func (m Mail) FetchMessages(maxMessages int, onlyUnread bool) (ids []string, count int, err error) {
 	criteria := imap.NewSearchCriteria()
 
 	if onlyUnread {
@@ -52,15 +57,22 @@ func (m *Mail) FetchMessages(maxMessages uint32, onlyUnread bool) (ids []uint32,
 		return
 	}
 
-	if box.Messages < maxMessages {
-		maxMessages = box.Messages
+	maxMessagesUint := uint32(maxMessages)
+
+	if box.Messages < maxMessagesUint {
+		maxMessagesUint = box.Messages
 	}
 
 	seq := new(imap.SeqSet)
-	seq.AddRange(1, maxMessages)
+	seq.AddRange(1, maxMessagesUint)
 	criteria.SeqNum = seq
 
-	ids, err = m.client.Search(criteria)
+	var rawIDs []uint32
+	rawIDs, err = m.client.Search(criteria)
+
+	for _, id := range rawIDs {
+		ids = append(ids, strconv.Itoa(int(id)))
+	}
 
 	count = len(ids)
 
