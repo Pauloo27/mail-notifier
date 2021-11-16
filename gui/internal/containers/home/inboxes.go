@@ -1,11 +1,13 @@
 package home
 
 import (
+	"github.com/Pauloo27/mail-notifier/gui/internal/config"
 	"github.com/Pauloo27/mail-notifier/gui/utils"
+	"github.com/Pauloo27/mail-notifier/internal/providers"
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func createInboxItem(email string) *gtk.Box {
+func createInboxItem(email string, ok bool) *gtk.Box {
 	container, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 5)
 	utils.HandleError(err)
 
@@ -15,7 +17,15 @@ func createInboxItem(email string) *gtk.Box {
 	unreadLbl, err := gtk.LabelNew("10")
 	utils.HandleError(err)
 
-	seeMoreBtn, err := gtk.ButtonNewFromIconName("go-next", gtk.ICON_SIZE_BUTTON)
+	var iconName string
+
+	if ok {
+		iconName = "go-next"
+	} else {
+		iconName = "security-low"
+	}
+
+	seeMoreBtn, err := gtk.ButtonNewFromIconName(iconName, gtk.ICON_SIZE_BUTTON)
 	utils.HandleError(err)
 
 	container.PackStart(emailLbl, false, false, 0)
@@ -23,27 +33,6 @@ func createInboxItem(email string) *gtk.Box {
 	container.PackEnd(unreadLbl, false, false, 1)
 
 	return container
-}
-
-var dummyInboxes = []string{
-	"test@example.com",
-	"test@example.com",
-	"test@example.com",
-	"test@example.com",
-	"test@example.com",
-	"test@example.com",
-	"test@example.com",
-	"test@example.com",
-	"test@example.com",
-	"test@example.com",
-	"test@example.com",
-	"test@example.com",
-	"test@example.com",
-	"test@example.com",
-	"test@example.com",
-	"test@example.com",
-	"test@example.com",
-	"test@example.com",
 }
 
 func createInboxList() *gtk.ScrolledWindow {
@@ -60,8 +49,13 @@ func createInboxList() *gtk.ScrolledWindow {
 	container.SetMarginStart(5)
 	container.SetMarginEnd(5)
 
-	for i, inbox := range dummyInboxes {
-		container.Attach(createInboxItem(inbox), 0, i, 1, 1)
+	for i, provider := range config.Config.Providers {
+		mail, err := providers.Factories[provider.Type](provider.Info)
+		if err != nil {
+			container.Attach(createInboxItem("invalid", false), 0, i, 1, 1)
+			continue
+		}
+		container.Attach(createInboxItem(mail.GetAddress(), true), 0, i, 1, 1)
 	}
 
 	return scroller
