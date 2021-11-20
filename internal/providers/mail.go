@@ -5,7 +5,7 @@ var (
 )
 
 type MailProvider interface {
-	FetchMessages(maxMessages int, onlyUnread bool) (ids []string, count int, err error)
+	FetchMessages(onlyUnread bool) (ids []string, count int, err error)
 	GetAddress() string
 }
 
