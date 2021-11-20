@@ -5,13 +5,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Pauloo27/mail-notifier/internal/providers"
-
+	"github.com/Pauloo27/mail-notifier/internal/provider"
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
 )
 
-var _ providers.MailProvider = Mail{}
+var _ provider.MailProvider = Mail{}
 
 type Mail struct {
 	Host, Username, Password string
@@ -21,7 +20,7 @@ type Mail struct {
 }
 
 func init() {
-	providers.Factories["imap"] = func(info map[string]interface{}) (providers.MailProvider, error) {
+	provider.Factories["imap"] = func(info map[string]interface{}) (provider.MailProvider, error) {
 		return NewMail(info["host"].(string), int(info["port"].(float64)), info["username"].(string), info["password"].(string))
 	}
 }
