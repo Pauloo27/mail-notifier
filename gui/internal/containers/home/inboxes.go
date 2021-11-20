@@ -4,26 +4,27 @@ import (
 	"strconv"
 
 	"github.com/Pauloo27/mail-notifier/gui/internal/config"
+	"github.com/Pauloo27/mail-notifier/gui/internal/containers/inbox"
 	"github.com/Pauloo27/mail-notifier/gui/utils"
-	"github.com/Pauloo27/mail-notifier/internal/providers"
+	"github.com/Pauloo27/mail-notifier/internal/provider"
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func createInboxItem(box providers.MailProvider) *gtk.Box {
+func createInboxItem(mail provider.MailProvider) *gtk.Box {
 	container, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 5)
 	utils.HandleError(err)
 
-	ok := box != nil
+	ok := mail != nil
 
 	address := "invalid"
 	if ok {
-		address = box.GetAddress()
+		address = mail.GetAddress()
 	}
 
 	emailLbl, err := gtk.LabelNew(address)
 	utils.HandleError(err)
 
-	_, count, err := box.FetchMessages(true)
+	messages, count, err := mail.FetchMessages(true)
 
 	unreadLbl, err := gtk.LabelNew(strconv.Itoa(count))
 	utils.HandleError(err)
@@ -38,6 +39,10 @@ func createInboxItem(box providers.MailProvider) *gtk.Box {
 
 	seeMoreBtn, err := gtk.ButtonNewFromIconName(iconName, gtk.ICON_SIZE_BUTTON)
 	utils.HandleError(err)
+
+	seeMoreBtn.Connect("clicked", func() {
+		inbox.Show(mail, messages)
+	})
 
 	container.PackStart(emailLbl, false, false, 0)
 	container.PackEnd(seeMoreBtn, false, false, 10)
@@ -60,8 +65,8 @@ func createInboxList() *gtk.ScrolledWindow {
 	container.SetMarginStart(5)
 	container.SetMarginEnd(5)
 
-	for i, provider := range config.Config.Providers {
-		mail, err := providers.Factories[provider.Type](provider.Info)
+	for i, p := range config.Config.Providers {
+		mail, err := provider.Factories[p.Type](p.Info)
 		if err != nil {
 			container.Attach(createInboxItem(nil), 0, i, 1, 1)
 			continue

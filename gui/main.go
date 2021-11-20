@@ -4,7 +4,7 @@ import (
 	"github.com/Pauloo27/mail-notifier/gui/internal/config"
 	"github.com/Pauloo27/mail-notifier/gui/internal/containers/home"
 
-	_ "github.com/Pauloo27/mail-notifier/internal/providers/mail"
+	_ "github.com/Pauloo27/mail-notifier/internal/provider/mail"
 )
 
 func main() {
