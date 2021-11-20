@@ -25,7 +25,7 @@ func init() {
 	}
 }
 
-func (m Mail) Connect() error {
+func (m *Mail) Connect() error {
 	c, err := client.DialTLS(fmt.Sprintf("%s:%d", m.Host, m.Port), nil)
 	m.client = c
 	return err
@@ -49,7 +49,7 @@ func NewMail(host string, port int, username, password string) (Mail, error) {
 	return m, err
 }
 
-func (m Mail) Disconnect() error {
+func (m *Mail) Disconnect() error {
 	return m.client.Logout()
 }
 
