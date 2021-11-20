@@ -1,20 +1,31 @@
 package home
 
 import (
+	"strconv"
+
 	"github.com/Pauloo27/mail-notifier/gui/internal/config"
 	"github.com/Pauloo27/mail-notifier/gui/utils"
 	"github.com/Pauloo27/mail-notifier/internal/providers"
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func createInboxItem(email string, ok bool) *gtk.Box {
+func createInboxItem(box providers.MailProvider) *gtk.Box {
 	container, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 5)
 	utils.HandleError(err)
 
-	emailLbl, err := gtk.LabelNew(email)
+	ok := box != nil
+
+	address := "invalid"
+	if ok {
+		address = box.GetAddress()
+	}
+
+	emailLbl, err := gtk.LabelNew(address)
 	utils.HandleError(err)
 
-	unreadLbl, err := gtk.LabelNew("10")
+	_, count, err := box.FetchMessages(true)
+
+	unreadLbl, err := gtk.LabelNew(strconv.Itoa(count))
 	utils.HandleError(err)
 
 	var iconName string
@@ -52,10 +63,10 @@ func createInboxList() *gtk.ScrolledWindow {
 	for i, provider := range config.Config.Providers {
 		mail, err := providers.Factories[provider.Type](provider.Info)
 		if err != nil {
-			container.Attach(createInboxItem("invalid", false), 0, i, 1, 1)
+			container.Attach(createInboxItem(nil), 0, i, 1, 1)
 			continue
 		}
-		container.Attach(createInboxItem(mail.GetAddress(), true), 0, i, 1, 1)
+		container.Attach(createInboxItem(mail), 0, i, 1, 1)
 	}
 
 	return scroller
