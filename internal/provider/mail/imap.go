@@ -53,7 +53,7 @@ func (m *Mail) Disconnect() error {
 	return m.client.Logout()
 }
 
-func (m Mail) FetchMessages(onlyUnread bool) (ids []string, count int, err error) {
+func (m Mail) FetchMessages(onlyUnread bool) (messages []provider.MailMessage, count int, err error) {
 	criteria := imap.NewSearchCriteria()
 
 	if onlyUnread {
@@ -71,10 +71,10 @@ func (m Mail) FetchMessages(onlyUnread bool) (ids []string, count int, err error
 	rawIDs, err = m.client.Search(criteria)
 
 	for _, id := range rawIDs {
-		ids = append(ids, strconv.Itoa(int(id)))
+		messages = append(messages, MailMessage{id: strconv.Itoa(int(id)), mail: &m})
 	}
 
-	count = len(ids)
+	count = len(messages)
 
 	return
 }
