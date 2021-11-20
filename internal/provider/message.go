@@ -1,9 +1,11 @@
 package provider
 
+import "time"
+
 type MailMessage interface {
 	GetID() string
 	GetSubject() string
-	GetBody() string
-	GetSenderAddress() string
-	GetRecipientAddress() string
+	GetTo() []string
+	GetFrom() string
+	GetDate() time.Time
 }
