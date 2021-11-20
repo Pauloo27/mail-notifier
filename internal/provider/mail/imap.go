@@ -100,7 +100,6 @@ func (m Mail) FetchMessage(id string) (message provider.MailMessage, err error) 
 	if err != nil {
 		return
 	}
-	fmt.Println("the subject is", subject)
 
 	addrs, err = header.AddressList("From")
 	if err != nil {
