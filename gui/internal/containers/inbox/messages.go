@@ -10,10 +10,10 @@ func createMessageItem(message provider.MailMessage) *gtk.Box {
 	container, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 5)
 	utils.HandleError(err)
 
-	unreadLbl, err := gtk.LabelNew(message.GetID())
+	subjectLbl, err := gtk.LabelNew(message.GetSubject())
 	utils.HandleError(err)
 
-	container.PackStart(unreadLbl, false, false, 1)
+	container.PackStart(subjectLbl, false, false, 1)
 
 	return container
 }
