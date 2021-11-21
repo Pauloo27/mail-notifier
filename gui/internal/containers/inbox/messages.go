@@ -7,13 +7,17 @@ import (
 )
 
 func createMessageItem(message provider.MailMessage) *gtk.Box {
-	container, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 5)
+	container, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 5)
 	utils.HandleError(err)
 
 	subjectLbl, err := gtk.LabelNew(message.GetSubject())
 	utils.HandleError(err)
 
+	fromLbl, err := gtk.LabelNew(message.GetFrom())
+	utils.HandleError(err)
+
 	container.PackStart(subjectLbl, false, false, 1)
+	container.PackStart(fromLbl, false, false, 1)
 
 	return container
 }
