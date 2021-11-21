@@ -105,7 +105,7 @@ func (m Mail) FetchMessage(id string) (message provider.MailMessage, err error) 
 	if err != nil {
 		return
 	}
-	from = addrs[0].String()
+	from = addrs[0].Address
 
 	addrs, err = header.AddressList("To")
 	if err != nil {
@@ -113,7 +113,7 @@ func (m Mail) FetchMessage(id string) (message provider.MailMessage, err error) 
 	}
 
 	for _, add := range addrs {
-		to = append(to, add.String())
+		to = append(to, add.Address)
 	}
 
 	message = MailMessage{
