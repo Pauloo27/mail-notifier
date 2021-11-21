@@ -6,8 +6,8 @@
   - [ ] account listing (with delete button)
 - [X] home page:
   - [X] list inboxes 
-- [ ] inbox page:
-  - [ ] list messages 
+- [X] inbox page:
+  - [X] list messages 
 - [X] core:
   - [X] create provider interface
   - [X] imap:
