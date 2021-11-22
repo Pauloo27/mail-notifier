@@ -7,17 +7,32 @@ import (
 )
 
 func createMessageItem(message provider.MailMessage) *gtk.Box {
-	container, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 5)
+	container, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 5)
+	utils.HandleError(err)
+
+	leftContainer, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 5)
 	utils.HandleError(err)
 
 	subjectLbl, err := gtk.LabelNew(message.GetSubject())
 	utils.HandleError(err)
+	subjectLbl.SetHAlign(gtk.ALIGN_START)
 
 	fromLbl, err := gtk.LabelNew(message.GetFrom())
 	utils.HandleError(err)
+	fromLbl.SetHAlign(gtk.ALIGN_START)
 
-	container.PackStart(subjectLbl, false, false, 1)
-	container.PackStart(fromLbl, false, false, 1)
+	leftContainer.PackStart(subjectLbl, false, false, 1)
+	leftContainer.PackStart(fromLbl, false, false, 1)
+
+	markAsReadBtn, err := gtk.ButtonNewFromIconName("mail-read", gtk.ICON_SIZE_BUTTON)
+	utils.HandleError(err)
+
+	markAsReadBtn.Connect("clicked", func() {
+		// TODO: write me please
+	})
+
+	container.PackStart(leftContainer, false, false, 1)
+	container.PackEnd(markAsReadBtn, false, true, 1)
 
 	return container
 }

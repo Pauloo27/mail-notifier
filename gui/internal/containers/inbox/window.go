@@ -19,7 +19,7 @@ func Show(mail provider.MailProvider, messages []provider.MailMessage) {
 	mainContainer, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 1)
 	utils.HandleError(err)
 
-	mainContainer.PackStart(createHeader(mail), false, false, 5)
+	mainContainer.PackStart(createHeader(mail, win), false, false, 5)
 	mainContainer.PackStart(createMessageList(mail, messages), true, true, 5)
 
 	win.Add(mainContainer)
