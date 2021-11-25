@@ -10,9 +10,10 @@
   - [X] list messages 
   - [X] mark as read btn
   - [ ] preview message (webview?)
-- [o] core:
+  - [ ] loading spinner
+- [X] core:
   - [X] create provider interface
-  - [ ] mask as read interface
+  - [X] mask as read interface
   - [X] imap:
     - [X] load info from file
-    - [ ] mask as read impl
+    - [X] mask as read impl

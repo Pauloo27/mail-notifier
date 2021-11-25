@@ -6,7 +6,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func createMessageItem(message provider.MailMessage) *gtk.Box {
+func createMessageItem(mail provider.MailProvider, message provider.MailMessage) *gtk.Box {
 	container, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 5)
 	utils.HandleError(err)
 
@@ -28,7 +28,10 @@ func createMessageItem(message provider.MailMessage) *gtk.Box {
 	utils.HandleError(err)
 
 	markAsReadBtn.Connect("clicked", func() {
-		// TODO: write me please
+		err := mail.MarkMessageAsRead(message.GetID())
+		if err != nil {
+			panic(err) // FIXME
+		}
 	})
 
 	container.PackStart(leftContainer, false, false, 1)
@@ -52,7 +55,7 @@ func createMessageList(mail provider.MailProvider, messages []provider.MailMessa
 	container.SetMarginEnd(5)
 
 	for i, message := range messages {
-		container.Attach(createMessageItem(message), 0, i, 1, 1)
+		container.Attach(createMessageItem(mail, message), 0, i, 1, 1)
 	}
 
 	return scroller
