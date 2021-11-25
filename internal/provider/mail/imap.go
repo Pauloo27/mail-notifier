@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/Pauloo27/mail-notifier/internal/provider"
@@ -19,6 +20,7 @@ type Mail struct {
 	Port                     int
 
 	client *client.Client
+	lock   *sync.Mutex
 }
 
 func init() {
@@ -38,12 +40,37 @@ func (m Mail) GetAddress() string {
 	// maybe i can  get it from imap?
 }
 
+func (m Mail) MarkMessageAsRead(id string) (err error) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	_, err = m.client.Select("INBOX", false)
+	if err != nil {
+		return
+	}
+	defer m.client.Unselect()
+
+	numericID, err := strconv.Atoi(id)
+	if err != nil {
+		return err
+	}
+
+	seqSet := new(imap.SeqSet)
+	seqSet.AddNum(uint32(numericID))
+	item := imap.FormatFlagsOp(imap.AddFlags, true)
+	flags := []interface{}{imap.SeenFlag}
+	err = m.client.Store(seqSet, item, flags, nil)
+
+	return
+}
+
 func NewMail(host string, port int, username, password string) (Mail, error) {
 	m := Mail{
 		Host:     host,
 		Port:     port,
 		Username: username,
 		Password: password,
+		lock:     &sync.Mutex{},
 	}
 	err := m.Connect()
 	if err == nil {
@@ -57,6 +84,15 @@ func (m *Mail) Disconnect() error {
 }
 
 func (m Mail) FetchMessage(id string) (message provider.MailMessage, err error) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	_, err = m.client.Select("INBOX", true)
+	if err != nil {
+		return
+	}
+	defer m.client.Unselect()
+
 	seq := new(imap.SeqSet)
 	seq.Add(id)
 
@@ -129,6 +165,9 @@ func (m Mail) FetchMessage(id string) (message provider.MailMessage, err error) 
 }
 
 func (m Mail) FetchMessages(onlyUnread bool) (messages []provider.MailMessage, count int, err error) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
 	criteria := imap.NewSearchCriteria()
 
 	if onlyUnread {
@@ -139,6 +178,8 @@ func (m Mail) FetchMessages(onlyUnread bool) (messages []provider.MailMessage, c
 	if err != nil {
 		return
 	}
+
+	defer m.client.Unselect()
 
 	criteria.Since = time.Now().AddDate(-1, 0, 0) // limit search on 1 year
 
