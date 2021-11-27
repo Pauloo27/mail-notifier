@@ -40,6 +40,25 @@ func (m Mail) GetAddress() string {
 	// maybe i can  get it from imap?
 }
 
+func NewMail(host string, port int, username, password string) (Mail, error) {
+	m := Mail{
+		Host:     host,
+		Port:     port,
+		Username: username,
+		Password: password,
+		lock:     &sync.Mutex{},
+	}
+	err := m.Connect()
+	if err == nil {
+		err = m.client.Login(username, password)
+	}
+	return m, err
+}
+
+func (m *Mail) Disconnect() error {
+	return m.client.Logout()
+}
+
 func (m Mail) MarkMessageAsRead(id string) (err error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
@@ -62,25 +81,6 @@ func (m Mail) MarkMessageAsRead(id string) (err error) {
 	err = m.client.Store(seqSet, item, flags, nil)
 
 	return
-}
-
-func NewMail(host string, port int, username, password string) (Mail, error) {
-	m := Mail{
-		Host:     host,
-		Port:     port,
-		Username: username,
-		Password: password,
-		lock:     &sync.Mutex{},
-	}
-	err := m.Connect()
-	if err == nil {
-		err = m.client.Login(username, password)
-	}
-	return m, err
-}
-
-func (m *Mail) Disconnect() error {
-	return m.client.Logout()
 }
 
 func (m Mail) FetchMessage(id string) (message provider.MailMessage, err error) {
@@ -166,7 +166,7 @@ func (m Mail) FetchMessage(id string) (message provider.MailMessage, err error) 
 	return
 }
 
-func (m Mail) FetchMessages(onlyUnread bool) (messages []provider.MailMessage, count int, err error) {
+func (m Mail) FetchMessages(onlyUnread bool) (messages []provider.MailMessage, err error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -195,8 +195,6 @@ func (m Mail) FetchMessages(onlyUnread bool) (messages []provider.MailMessage, c
 			mail: &m,
 		})
 	}
-
-	count = len(messages)
 
 	return
 }
