@@ -19,13 +19,14 @@ type Mail struct {
 	Host, Username, Password string
 	Port                     int
 
+	webURL string
 	client *client.Client
 	lock   *sync.Mutex
 }
 
 func init() {
 	provider.Factories["imap"] = func(info map[string]interface{}) (provider.MailProvider, error) {
-		return NewMail(info["host"].(string), int(info["port"].(float64)), info["username"].(string), info["password"].(string))
+		return NewMail(info["host"].(string), int(info["port"].(float64)), info["username"].(string), info["password"].(string), info["url"].(string))
 	}
 }
 
@@ -35,18 +36,23 @@ func (m *Mail) Connect() error {
 	return err
 }
 
+func (m Mail) GetWebURL() string {
+	return m.webURL
+}
+
 func (m Mail) GetAddress() string {
 	return m.Username // FIXME: the username is always not the complete address,
 	// maybe i can  get it from imap?
 }
 
-func NewMail(host string, port int, username, password string) (Mail, error) {
+func NewMail(host string, port int, username, password string, webURL string) (Mail, error) {
 	m := Mail{
 		Host:     host,
 		Port:     port,
 		Username: username,
 		Password: password,
 		lock:     &sync.Mutex{},
+		webURL:   webURL,
 	}
 	err := m.Connect()
 	if err == nil {

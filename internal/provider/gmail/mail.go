@@ -1,6 +1,7 @@
 package gmail
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -18,11 +19,12 @@ type Gmail struct {
 	Config      *oauth2.Config
 	Service     *gmail.Service
 	mailAddress string
+	userID      int
 }
 
 func init() {
 	provider.Factories["gmail"] = func(info map[string]interface{}) (provider.MailProvider, error) {
-		m, err := NewGmail(info["credentials"].(string))
+		m, err := NewGmail(info["credentials"].(string), int(info["id"].(float64)))
 		if err != nil {
 			return nil, err
 		}
@@ -35,7 +37,7 @@ func init() {
 	}
 }
 
-func NewGmail(credentialsFilePath string) (*Gmail, error) {
+func NewGmail(credentialsFilePath string, userID int) (*Gmail, error) {
 	buf, err := os.ReadFile(credentialsFilePath)
 	if err != nil {
 		return nil, err
@@ -45,6 +47,7 @@ func NewGmail(credentialsFilePath string) (*Gmail, error) {
 		return nil, err
 	}
 	return &Gmail{
+		userID: userID,
 		Config: config,
 	}, nil
 }
@@ -81,6 +84,10 @@ func (m Gmail) FetchMessage(id string) (message provider.MailMessage, err error)
 
 func (m Gmail) GetAddress() string {
 	return m.mailAddress
+}
+
+func (m Gmail) GetWebURL() string {
+	return fmt.Sprintf("https://mail.google.com/mail/u/%d", m.userID)
 }
 
 func (m Gmail) MarkMessageAsRead(id string) (err error) {

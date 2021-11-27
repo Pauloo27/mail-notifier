@@ -9,6 +9,7 @@ type MailProvider interface {
 	FetchMessage(id string) (message MailMessage, err error)
 	MarkMessageAsRead(id string) error
 	GetAddress() string
+	GetWebURL() string
 }
 
 type MailProviderFactory func(info map[string]interface{}) (MailProvider, error)
