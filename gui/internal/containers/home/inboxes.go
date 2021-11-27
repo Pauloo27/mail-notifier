@@ -39,6 +39,8 @@ func createInboxItem(mail provider.MailProvider, messages []provider.MailMessage
 	seeMoreBtn, err := gtk.ButtonNewFromIconName(iconName, gtk.ICON_SIZE_BUTTON)
 	utils.HandleError(err)
 
+	seeMoreBtn.SetTooltipText("List messages")
+
 	seeMoreBtn.Connect("clicked", func() {
 		inbox.Show(mail, messages)
 	})

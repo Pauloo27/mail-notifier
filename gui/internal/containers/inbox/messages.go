@@ -81,6 +81,8 @@ func createMessageItem(mail provider.MailProvider, message provider.MailMessage)
 		}()
 	})
 
+	markAsReadBtn.SetTooltipText("Mark as read")
+
 	container.PackStart(leftContainer, false, false, 1)
 	container.PackEnd(markAsReadBtn, false, false, 10)
 
