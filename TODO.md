@@ -1,6 +1,7 @@
 # To-Do
 
 - [ ] encrypt token/user/password
+- [ ] cli for polybar
 - [ ] settings page:
   - [ ] new account btn
   - [ ] account listing (with delete button)
@@ -13,10 +14,13 @@
   - [X] loading spinner
   - [X] async mark as read
   - [ ] add ... to long subjects
-  - [ ] preview message (webview?)
-- [X] core:
+  - [ ] preview message (webview? nope. cant disable js/image load)
+  - [ ] open message (launch browser)
+- [O] core:
   - [X] create provider interface
   - [X] mask as read interface
+  - [ ] gmail:
+    - [ ] ...
   - [X] imap:
     - [X] load info from file
     - [X] mask as read impl
