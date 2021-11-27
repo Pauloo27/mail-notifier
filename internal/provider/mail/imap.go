@@ -153,12 +153,14 @@ func (m Mail) FetchMessage(id string) (message provider.MailMessage, err error) 
 	}
 
 	message = MailMessage{
-		id:      id,
-		date:    date,
-		from:    from,
-		to:      to,
-		subject: subject,
-		loaded:  true,
+		id: id,
+		data: &mailMessageData{
+			date:    date,
+			from:    from,
+			to:      to,
+			subject: subject,
+			loaded:  true,
+		},
 	}
 
 	return
@@ -187,7 +189,11 @@ func (m Mail) FetchMessages(onlyUnread bool) (messages []provider.MailMessage, c
 	rawIDs, err = m.client.Search(criteria)
 
 	for _, id := range rawIDs {
-		messages = append(messages, MailMessage{id: strconv.Itoa(int(id)), loaded: false, mail: &m})
+		messages = append(messages, MailMessage{
+			id:   strconv.Itoa(int(id)),
+			data: &mailMessageData{loaded: false},
+			mail: &m,
+		})
 	}
 
 	count = len(messages)
