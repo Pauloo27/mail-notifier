@@ -6,23 +6,8 @@ import (
 	"os"
 
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/api/gmail/v1"
 )
-
-func NewGmail(credentialsFilePath string) (*Gmail, error) {
-	buf, err := os.ReadFile(credentialsFilePath)
-	if err != nil {
-		return nil, err
-	}
-	config, err := google.ConfigFromJSON(buf, gmail.GmailReadonlyScope)
-	if err != nil {
-		return nil, err
-	}
-	return &Gmail{
-		Config: config,
-	}, nil
-}
 
 func (m *Gmail) GetLoginURL() string {
 	return m.Config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
@@ -57,5 +42,10 @@ func (m *Gmail) LoginWithToken(token *oauth2.Token) error {
 		return err
 	}
 	m.Service = service
+	p, err := service.Users.GetProfile("me").Do()
+	if err != nil {
+		return err
+	}
+	m.mailAddress = p.EmailAddress
 	return nil
 }
