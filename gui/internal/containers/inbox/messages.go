@@ -3,8 +3,32 @@ package inbox
 import (
 	"github.com/Pauloo27/mail-notifier/gui/utils"
 	"github.com/Pauloo27/mail-notifier/internal/provider"
+	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
+
+func asyncLoad(container *gtk.Grid, mail provider.MailProvider, messages []provider.MailMessage) {
+	spinner, err := gtk.SpinnerNew()
+	utils.HandleError(err)
+
+	spinner.Start()
+
+	container.Attach(spinner, 0, 0, 1, 1)
+
+	go func() {
+		for _, message := range messages {
+			_ = message.GetFrom() // Just to trigger the lazy load
+		}
+		glib.IdleAdd(func() {
+			spinner.Destroy()
+			for i, message := range messages {
+				container.Attach(createMessageItem(mail, message), 0, i, 1, 1)
+			}
+			container.ShowAll()
+		})
+	}()
+
+}
 
 func createMessageItem(mail provider.MailProvider, message provider.MailMessage) *gtk.Box {
 	container, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 5)
@@ -56,9 +80,7 @@ func createMessageList(mail provider.MailProvider, messages []provider.MailMessa
 	container.SetMarginStart(5)
 	container.SetMarginEnd(5)
 
-	for i, message := range messages {
-		container.Attach(createMessageItem(mail, message), 0, i, 1, 1)
-	}
+	asyncLoad(container, mail, messages)
 
 	return scroller
 }
