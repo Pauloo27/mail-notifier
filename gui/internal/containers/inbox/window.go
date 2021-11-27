@@ -25,7 +25,7 @@ func Show(mail provider.MailProvider, messages []provider.MailMessage) {
 	win.Add(mainContainer)
 
 	win.SetTitle("Mail notifier - Inbox")
-	win.SetDefaultSize(300, 500)
+	win.SetDefaultSize(450, 500)
 	win.ShowAll()
 	gtk.Main()
 }

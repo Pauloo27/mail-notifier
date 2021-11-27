@@ -27,6 +27,8 @@ func createMessageItem(mail provider.MailProvider, message provider.MailMessage)
 	markAsReadBtn, err := gtk.ButtonNewFromIconName("mail-read", gtk.ICON_SIZE_BUTTON)
 	utils.HandleError(err)
 
+	markAsReadBtn.SetVAlign(gtk.ALIGN_CENTER)
+
 	markAsReadBtn.Connect("clicked", func() {
 		err := mail.MarkMessageAsRead(message.GetID())
 		if err != nil {
@@ -35,7 +37,7 @@ func createMessageItem(mail provider.MailProvider, message provider.MailMessage)
 	})
 
 	container.PackStart(leftContainer, false, false, 1)
-	container.PackEnd(markAsReadBtn, false, true, 1)
+	container.PackEnd(markAsReadBtn, false, false, 10)
 
 	return container
 }

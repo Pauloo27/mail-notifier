@@ -24,7 +24,7 @@ func Show() {
 	win.Add(mainContainer)
 
 	win.SetTitle("Mail notifier")
-	win.SetDefaultSize(300, 500)
+	win.SetDefaultSize(450, 500)
 	win.ShowAll()
 	gtk.Main()
 }
