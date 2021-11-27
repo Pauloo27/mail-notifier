@@ -10,7 +10,9 @@
 - [o] inbox page:
   - [X] list messages 
   - [X] mark as read btn
-  - [ ] loading spinner
+  - [X] loading spinner
+  - [X] async mark as read
+  - [ ] add ... to long subjects
   - [ ] preview message (webview?)
 - [X] core:
   - [X] create provider interface
