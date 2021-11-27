@@ -1,6 +1,8 @@
 package inbox
 
 import (
+	"os/exec"
+
 	"github.com/Pauloo27/mail-notifier/gui/utils"
 	"github.com/Pauloo27/mail-notifier/internal/provider"
 	"github.com/gotk3/gotk3/glib"
@@ -48,11 +50,11 @@ func createMessageItem(mail provider.MailProvider, message provider.MailMessage)
 	leftContainer, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 5)
 	utils.HandleError(err)
 
-	subjectLbl, err := gtk.LabelNew(utils.AddEllipsis(message.GetSubject(), 50))
+	subjectLbl, err := gtk.LabelNew(utils.AddEllipsis(message.GetSubject(), 40))
 	utils.HandleError(err)
 	subjectLbl.SetHAlign(gtk.ALIGN_START)
 
-	fromLbl, err := gtk.LabelNew(utils.AddEllipsis(message.GetFrom(), 40))
+	fromLbl, err := gtk.LabelNew(utils.AddEllipsis(message.GetFrom(), 30))
 	utils.HandleError(err)
 	fromLbl.SetHAlign(gtk.ALIGN_START)
 
@@ -83,8 +85,21 @@ func createMessageItem(mail provider.MailProvider, message provider.MailMessage)
 
 	markAsReadBtn.SetTooltipText("Mark as read")
 
+	openBtn, err := gtk.ButtonNewFromIconName("go-up", gtk.ICON_SIZE_BUTTON)
+	utils.HandleError(err)
+
+	openBtn.SetTooltipText("Open inbox on browser")
+	openBtn.SetVAlign(gtk.ALIGN_CENTER)
+
+	openBtn.Connect("clicked", func() {
+		url := mail.GetWebURL()
+		// TODO: cross platform?
+		_ = exec.Command("xdg-open", url).Start()
+	})
+
 	container.PackStart(leftContainer, false, false, 1)
-	container.PackEnd(markAsReadBtn, false, false, 10)
+	container.PackEnd(markAsReadBtn, false, false, 1)
+	container.PackEnd(openBtn, false, false, 1)
 
 	return container
 }

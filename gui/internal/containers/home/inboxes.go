@@ -1,6 +1,7 @@
 package home
 
 import (
+	"os/exec"
 	"strconv"
 
 	"github.com/Pauloo27/mail-notifier/gui/internal/config"
@@ -45,8 +46,23 @@ func createInboxItem(mail provider.MailProvider, messages []provider.MailMessage
 		inbox.Show(mail, messages)
 	})
 
+	openBtn, err := gtk.ButtonNewFromIconName("go-up", gtk.ICON_SIZE_BUTTON)
+	utils.HandleError(err)
+
+	openBtn.SetTooltipText("Open inbox on browser")
+
+	openBtn.Connect("clicked", func() {
+		if !ok {
+			return
+		}
+		url := mail.GetWebURL()
+		// TODO: cross platform?
+		_ = exec.Command("xdg-open", url).Start()
+	})
+
 	container.PackStart(emailLbl, false, false, 0)
-	container.PackEnd(seeMoreBtn, false, false, 10)
+	container.PackEnd(seeMoreBtn, false, false, 1)
+	container.PackEnd(openBtn, false, false, 1)
 	container.PackEnd(unreadLbl, false, false, 1)
 
 	return container
