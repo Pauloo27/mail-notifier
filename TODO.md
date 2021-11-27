@@ -2,6 +2,7 @@
 
 - [ ] encrypt token/user/password
 - [ ] cli for polybar
+- [ ] shared data?
 - [ ] settings page:
   - [ ] new account btn
   - [ ] account listing (with delete button)
@@ -20,7 +21,8 @@
   - [X] create provider interface
   - [X] mask as read interface
   - [ ] gmail:
-    - [ ] ...
+    - [ ] parse mail to list with regex?
+    - [ ] mark as read
   - [X] imap:
     - [X] load info from file
     - [X] mask as read impl
