@@ -1,6 +1,7 @@
 package gmail
 
 import (
+	"errors"
 	"net/http"
 	"os"
 	"time"
@@ -84,7 +85,7 @@ func (m Gmail) GetAddress() string {
 }
 
 func (m Gmail) MarkMessageAsRead(id string) (err error) {
-	return nil
+	return errors.New("not implemented yet")
 }
 
 func (m Gmail) FetchMessages(onlyUnread bool) (messages []provider.MailMessage, err error) {
