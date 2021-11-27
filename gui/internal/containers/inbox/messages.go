@@ -7,6 +7,11 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
+var (
+	messages      []provider.MailMessage
+	mainContainer *gtk.Grid
+)
+
 func asyncLoad(container *gtk.Grid, mail provider.MailProvider, messages []provider.MailMessage) {
 	spinner, err := gtk.SpinnerNew()
 	utils.HandleError(err)
@@ -20,7 +25,13 @@ func asyncLoad(container *gtk.Grid, mail provider.MailProvider, messages []provi
 			_ = message.GetFrom() // Just to trigger the lazy load
 		}
 		glib.IdleAdd(func() {
-			spinner.Destroy()
+			children := container.GetChildren()
+
+			children.Foreach(func(item interface{}) {
+				wid := item.(*gtk.Widget)
+				wid.Destroy()
+			})
+
 			for i, message := range messages {
 				container.Attach(createMessageItem(mail, message), 0, i, 1, 1)
 			}
@@ -54,10 +65,20 @@ func createMessageItem(mail provider.MailProvider, message provider.MailMessage)
 	markAsReadBtn.SetVAlign(gtk.ALIGN_CENTER)
 
 	markAsReadBtn.Connect("clicked", func() {
-		err := mail.MarkMessageAsRead(message.GetID())
-		if err != nil {
-			panic(err) // FIXME
+		var newMessages []provider.MailMessage
+		for _, m := range messages {
+			if m.GetID() != message.GetID() {
+				newMessages = append(newMessages, m)
+			}
 		}
+		messages = newMessages
+		asyncLoad(mainContainer, mail, messages)
+		go func() {
+			err := mail.MarkMessageAsRead(message.GetID())
+			if err != nil {
+				panic(err) // FIXME
+			}
+		}()
 	})
 
 	container.PackStart(leftContainer, false, false, 1)
@@ -66,21 +87,23 @@ func createMessageItem(mail provider.MailProvider, message provider.MailMessage)
 	return container
 }
 
-func createMessageList(mail provider.MailProvider, messages []provider.MailMessage) *gtk.ScrolledWindow {
+func createMessageList(mail provider.MailProvider, messagesParam []provider.MailMessage) *gtk.ScrolledWindow {
+	messages = messagesParam
+
 	scroller, err := gtk.ScrolledWindowNew(nil, nil)
 	utils.HandleError(err)
 
-	container, err := gtk.GridNew()
+	mainContainer, err = gtk.GridNew()
 	utils.HandleError(err)
 
-	scroller.Add(container)
+	scroller.Add(mainContainer)
 
-	container.SetRowSpacing(5)
-	container.SetColumnHomogeneous(true)
-	container.SetMarginStart(5)
-	container.SetMarginEnd(5)
+	mainContainer.SetRowSpacing(5)
+	mainContainer.SetColumnHomogeneous(true)
+	mainContainer.SetMarginStart(5)
+	mainContainer.SetMarginEnd(5)
 
-	asyncLoad(container, mail, messages)
+	asyncLoad(mainContainer, mail, messages)
 
 	return scroller
 }
