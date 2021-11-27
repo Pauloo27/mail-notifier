@@ -48,11 +48,11 @@ func createMessageItem(mail provider.MailProvider, message provider.MailMessage)
 	leftContainer, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 5)
 	utils.HandleError(err)
 
-	subjectLbl, err := gtk.LabelNew(message.GetSubject())
+	subjectLbl, err := gtk.LabelNew(utils.AddEllipsis(message.GetSubject(), 50))
 	utils.HandleError(err)
 	subjectLbl.SetHAlign(gtk.ALIGN_START)
 
-	fromLbl, err := gtk.LabelNew(message.GetFrom())
+	fromLbl, err := gtk.LabelNew(utils.AddEllipsis(message.GetFrom(), 40))
 	utils.HandleError(err)
 	fromLbl.SetHAlign(gtk.ALIGN_START)
 
