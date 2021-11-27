@@ -6,9 +6,9 @@
 - [ ] settings page:
   - [ ] new account btn
   - [ ] account listing (with delete button)
-- [o] home page:
+- [X] home page:
   - [X] list inboxes 
-  - [ ] open inbox (launch browser)
+  - [X] open inbox (launch browser)
   - [X] loading spinner
 - [O] inbox page:
   - [X] list messages 
@@ -17,13 +17,14 @@
   - [X] async mark as read
   - [X] add ... to long subjects
   - [ ] preview message (webview? nope. cant disable js/image load)
-  - [ ] open message (launch browser)
+  - [X] open message (launch browser)
 - [O] core:
   - [X] create provider interface
-  - [X] mask as read interface
-  - [o] gmail:
+  - [X] mark as read interface
+  - [.] gmail:
     - [ ] parse mail to list with regex?
     - [X] mark as read
+    - [ ] batch-get messages?
   - [X] imap:
     - [X] load info from file
-    - [X] mask as read impl
+    - [X] mark as read impl
