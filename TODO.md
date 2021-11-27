@@ -6,8 +6,9 @@
 - [ ] settings page:
   - [ ] new account btn
   - [ ] account listing (with delete button)
-- [X] home page:
+- [o] home page:
   - [X] list inboxes 
+  - [ ] open inbox (launch browser)
   - [X] loading spinner
 - [O] inbox page:
   - [X] list messages 
@@ -20,9 +21,9 @@
 - [O] core:
   - [X] create provider interface
   - [X] mask as read interface
-  - [ ] gmail:
+  - [o] gmail:
     - [ ] parse mail to list with regex?
-    - [ ] mark as read
+    - [X] mark as read
   - [X] imap:
     - [X] load info from file
     - [X] mask as read impl
