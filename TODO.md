@@ -8,12 +8,12 @@
 - [X] home page:
   - [X] list inboxes 
   - [X] loading spinner
-- [o] inbox page:
+- [O] inbox page:
   - [X] list messages 
   - [X] mark as read btn
   - [X] loading spinner
   - [X] async mark as read
-  - [ ] add ... to long subjects
+  - [X] add ... to long subjects
   - [ ] preview message (webview? nope. cant disable js/image load)
   - [ ] open message (launch browser)
 - [O] core:
