@@ -96,7 +96,7 @@ func createInboxList() *gtk.ScrolledWindow {
 		for _, p := range config.Config.Providers {
 			mail, err := provider.Factories[p.Type](p.Info)
 			if err == nil {
-				mailMessages, err := mail.FetchMessages(true)
+				mailMessages, err := mail.FetchUnreadMessages()
 				if err == nil {
 					loadedMails = append(loadedMails, mail)
 					messages = append(messages, mailMessages)

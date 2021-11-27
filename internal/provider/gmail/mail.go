@@ -97,11 +97,8 @@ func (m Gmail) MarkMessageAsRead(id string) (err error) {
 	return err
 }
 
-func (m Gmail) FetchMessages(onlyUnread bool) (messages []provider.MailMessage, err error) {
-	query := m.Service.Users.Messages.List("me").IncludeSpamTrash(true)
-	if onlyUnread {
-		query.LabelIds("UNREAD")
-	}
+func (m Gmail) FetchUnreadMessages() (messages []provider.MailMessage, err error) {
+	query := m.Service.Users.Messages.List("me").IncludeSpamTrash(true).LabelIds("UNREAD")
 
 	res, err := query.Do()
 	if err != nil {

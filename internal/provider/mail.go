@@ -5,7 +5,7 @@ var (
 )
 
 type MailProvider interface {
-	FetchMessages(onlyUnread bool) (ids []MailMessage, err error)
+	FetchUnreadMessages() (ids []MailMessage, err error)
 	FetchMessage(id string) (message MailMessage, err error)
 	MarkMessageAsRead(id string) error
 	GetAddress() string

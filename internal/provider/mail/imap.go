@@ -172,15 +172,13 @@ func (m Mail) FetchMessage(id string) (message provider.MailMessage, err error) 
 	return
 }
 
-func (m Mail) FetchMessages(onlyUnread bool) (messages []provider.MailMessage, err error) {
+func (m Mail) FetchUnreadMessages() (messages []provider.MailMessage, err error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
 	criteria := imap.NewSearchCriteria()
 
-	if onlyUnread {
-		criteria.WithoutFlags = []string{imap.SeenFlag}
-	}
+	criteria.WithoutFlags = []string{imap.SeenFlag}
 
 	_, err = m.client.Select("INBOX", true)
 	if err != nil {
