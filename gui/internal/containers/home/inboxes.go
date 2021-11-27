@@ -7,10 +7,11 @@ import (
 	"github.com/Pauloo27/mail-notifier/gui/internal/containers/inbox"
 	"github.com/Pauloo27/mail-notifier/gui/utils"
 	"github.com/Pauloo27/mail-notifier/internal/provider"
+	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func createInboxItem(mail provider.MailProvider) *gtk.Box {
+func createInboxItem(mail provider.MailProvider, messages []provider.MailMessage) *gtk.Box {
 	container, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 5)
 	utils.HandleError(err)
 
@@ -24,9 +25,7 @@ func createInboxItem(mail provider.MailProvider) *gtk.Box {
 	emailLbl, err := gtk.LabelNew(address)
 	utils.HandleError(err)
 
-	messages, count, err := mail.FetchMessages(true)
-
-	unreadLbl, err := gtk.LabelNew(strconv.Itoa(count))
+	unreadLbl, err := gtk.LabelNew(strconv.Itoa(len(messages)))
 	utils.HandleError(err)
 
 	var iconName string
@@ -65,14 +64,39 @@ func createInboxList() *gtk.ScrolledWindow {
 	container.SetMarginStart(5)
 	container.SetMarginEnd(5)
 
-	for i, p := range config.Config.Providers {
-		mail, err := provider.Factories[p.Type](p.Info)
-		if err != nil {
-			container.Attach(createInboxItem(nil), 0, i, 1, 1)
-			continue
+	spinner, err := gtk.SpinnerNew()
+	utils.HandleError(err)
+
+	spinner.Start()
+
+	container.Attach(spinner, 0, 0, 1, 1)
+
+	go func() {
+		var loadedMails []provider.MailProvider
+		var messages [][]provider.MailMessage
+
+		for _, p := range config.Config.Providers {
+			mail, err := provider.Factories[p.Type](p.Info)
+			if err == nil {
+				mailMessages, _, err := mail.FetchMessages(true)
+				if err == nil {
+					loadedMails = append(loadedMails, mail)
+					messages = append(messages, mailMessages)
+					continue
+				}
+			}
+			loadedMails = append(loadedMails, nil)
+			messages = append(messages, nil)
 		}
-		container.Attach(createInboxItem(mail), 0, i, 1, 1)
-	}
+
+		glib.IdleAdd(func() {
+			spinner.Destroy()
+			for i, m := range loadedMails {
+				container.Attach(createInboxItem(m, messages[i]), 0, i, 1, 1)
+			}
+			container.ShowAll()
+		})
+	}()
 
 	return scroller
 }
