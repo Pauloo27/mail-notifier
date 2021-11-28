@@ -1,6 +1,6 @@
 package config
 
-import "github.com/Pauloo27/mail-notifier/internal/storage"
+import "github.com/Pauloo27/mail-notifier/core/storage"
 
 var (
 	Config *storage.Config

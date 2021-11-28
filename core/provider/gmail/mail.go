@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/Pauloo27/mail-notifier/internal/provider"
+	"github.com/Pauloo27/mail-notifier/core/provider"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/gmail/v1"

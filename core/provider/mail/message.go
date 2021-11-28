@@ -3,7 +3,7 @@ package mail
 import (
 	"time"
 
-	"github.com/Pauloo27/mail-notifier/internal/provider"
+	"github.com/Pauloo27/mail-notifier/core/provider"
 )
 
 var _ provider.MailMessage = MailMessage{}

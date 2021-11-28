@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Pauloo27/mail-notifier/gui/utils"
-	"github.com/Pauloo27/mail-notifier/internal/provider"
+	"github.com/Pauloo27/mail-notifier/core/provider"
 	"github.com/gotk3/gotk3/gtk"
 )
 

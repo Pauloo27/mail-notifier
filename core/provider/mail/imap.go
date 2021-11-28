@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Pauloo27/mail-notifier/internal/provider"
+	"github.com/Pauloo27/mail-notifier/core/provider"
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
 	"github.com/emersion/go-message/mail"
