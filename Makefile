@@ -1,24 +1,21 @@
-BINARY_NAME = mail-notifier
+GUI_BINARY_NAME = mail-notifier-gui
+DAEMON_BINARY_NAME = mail-notifier-daemon
 
-build:
-	go build -o $(BINARY_NAME) -v ./gui
+.PHONY: build
+build: build-daemon build-gui
 
-dev:
-	fiber dev -r . -t ./gui
+.PHONY: daemon
+build-daemon:
+	go build -o $(DAEMON_BINARY_NAME) -v ./daemon
 
-run: build
-	./$(BINARY_NAME) 
+.PHONY: gui
+build-gui:
+	go build -o $(GUI_BINARY_NAME) -v ./gui
 
-install: build
-	sudo cp ./$(BINARY_NAME) /usr/bin/
+.PHONY: run-daemon
+run-daemon: build-daemon
+	./$(DAEMON_BINARY_NAME)
 
+.PHONY: tidy
 tidy:
 	go mod tidy
-
-# (build but with a smaller binary)
-dist:
-	go build -ldflags="-w -s" -gcflags=all=-l -v
-
-# (even smaller binary)
-pack: dist
-	upx ./$(BINARY_NAME)
