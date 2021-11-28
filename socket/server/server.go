@@ -3,6 +3,7 @@ package server
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"net"
 	"os"
 	"strings"
@@ -10,10 +11,21 @@ import (
 	"github.com/Pauloo27/mail-notifier/socket/common"
 )
 
-func handleCommand(command string) *common.Response {
-	return &common.Response{
-		Error: "not implemented yet",
+func handleCommand(line string) *common.Response {
+	line = strings.ToLower(line)
+	parts := strings.Split(line, " ")
+	command := parts[0]
+	var args []string
+	if len(parts) > 1 {
+		args = parts[1:]
 	}
+	handler, ok := commandMap[command]
+	if !ok {
+		return &common.Response{
+			Error: errors.New("command not found"),
+		}
+	}
+	return handler(command, args)
 }
 
 func handleConnection(conn net.Conn) error {
@@ -21,7 +33,7 @@ func handleConnection(conn net.Conn) error {
 	for {
 		line, err := rw.ReadString('\n')
 		if err != nil {
-			panic(err)
+			return err
 		}
 		response := handleCommand(strings.TrimSuffix(line, "\n"))
 		jsonResponse, err := json.Marshal(response)
