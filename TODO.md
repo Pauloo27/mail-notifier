@@ -1,10 +1,19 @@
 # To-Do
 
-- [ ] daemon:
+- [.] daemon:
   - [ ] encrypt token/user/password
-  - [ ] socket:
-    - [ ] handle new connections
-    - [ ] handle requests (see #format):
+  - [ ] use generics (go 1.18) for a serialization func
+  - [ ] socket client:
+    - [ ] command sender
+    - [ ] accept "force update" command
+  - [O] socket server:
+    - [o] trigger "force update"
+    - [X] handle new connections
+    - [X] handle requests (see #format):
+    - [.] commands:
+      - [X] list inboxes
+      - [ ] fetch unread messages (per inbox/all)
+      - [ ] fetch message
 - [ ] cli:
   - [ ] polybar integration
 - [ ] gui:
@@ -41,7 +50,8 @@ The deamon will read data until it receives a `\n`. The data received will be
 interpreted as a command. The available commands are:
 
 - `list_inboxes`: return the list of inboxes (id, address).
-- `fetch_unread_messages [id]`: return unread messages for a inbox.
+- `fetch_all_unread_messages [id]`: return unread messages for all inboxes.
+- `fetch_unread_messages_in [id]`: return unread messages for a inboxes.
 - `fetch_message [inbox_id] [id]`: return the data for a single message.
 - `mark_as_message [inbox_id] [id]`: return the data for a single message.
-
+- `refresh_inbox [inbox_id]`: return the data for a single message.
