@@ -12,7 +12,7 @@ import (
 	"google.golang.org/api/gmail/v1"
 )
 
-var _ provider.MailProvider = Gmail{}
+var _ provider.MailBox = Gmail{}
 
 type Gmail struct {
 	Client      *http.Client
@@ -23,7 +23,7 @@ type Gmail struct {
 }
 
 func init() {
-	provider.Factories["gmail"] = func(info map[string]interface{}) (provider.MailProvider, error) {
+	provider.Factories["gmail"] = func(info map[string]interface{}) (provider.MailBox, error) {
 		m, err := NewGmail(info["credentials"].(string), int(info["id"].(float64)))
 		if err != nil {
 			return nil, err

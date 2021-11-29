@@ -1,10 +1,10 @@
 package provider
 
 var (
-	Factories = map[string]MailProviderFactory{}
+	Factories = map[string]MailBoxFactory{}
 )
 
-type MailProvider interface {
+type MailBox interface {
 	FetchUnreadMessages() (ids []MailMessage, err error)
 	FetchMessage(id string) (message MailMessage, err error)
 	MarkMessageAsRead(id string) error
@@ -12,4 +12,4 @@ type MailProvider interface {
 	GetWebURL() string
 }
 
-type MailProviderFactory func(info map[string]interface{}) (MailProvider, error)
+type MailBoxFactory func(info map[string]interface{}) (MailBox, error)

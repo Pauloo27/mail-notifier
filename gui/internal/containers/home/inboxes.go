@@ -4,15 +4,15 @@ import (
 	"os/exec"
 	"strconv"
 
+	"github.com/Pauloo27/mail-notifier/core/provider"
 	"github.com/Pauloo27/mail-notifier/gui/internal/config"
 	"github.com/Pauloo27/mail-notifier/gui/internal/containers/inbox"
 	"github.com/Pauloo27/mail-notifier/gui/utils"
-	"github.com/Pauloo27/mail-notifier/core/provider"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func createInboxItem(mail provider.MailProvider, messages []provider.MailMessage) *gtk.Box {
+func createInboxItem(mail provider.MailBox, messages []provider.MailMessage) *gtk.Box {
 	container, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 5)
 	utils.HandleError(err)
 
@@ -90,7 +90,7 @@ func createInboxList() *gtk.ScrolledWindow {
 	container.Attach(spinner, 0, 0, 1, 1)
 
 	go func() {
-		var loadedMails []provider.MailProvider
+		var loadedMails []provider.MailBox
 		var messages [][]provider.MailMessage
 
 		for _, p := range config.Config.Providers {

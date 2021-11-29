@@ -3,12 +3,12 @@ package inbox
 import (
 	"fmt"
 
-	"github.com/Pauloo27/mail-notifier/gui/utils"
 	"github.com/Pauloo27/mail-notifier/core/provider"
+	"github.com/Pauloo27/mail-notifier/gui/utils"
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func createHeader(mail provider.MailProvider, win *gtk.Window) *gtk.HeaderBar {
+func createHeader(mail provider.MailBox, win *gtk.Window) *gtk.HeaderBar {
 	container, err := gtk.HeaderBarNew()
 	utils.HandleError(err)
 

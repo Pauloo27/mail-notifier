@@ -1,12 +1,12 @@
 package inbox
 
 import (
-	"github.com/Pauloo27/mail-notifier/gui/utils"
 	"github.com/Pauloo27/mail-notifier/core/provider"
+	"github.com/Pauloo27/mail-notifier/gui/utils"
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func Show(mail provider.MailProvider, messages []provider.MailMessage) {
+func Show(mail provider.MailBox, messages []provider.MailMessage) {
 	gtk.Init(nil)
 
 	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)

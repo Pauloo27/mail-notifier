@@ -3,8 +3,8 @@ package inbox
 import (
 	"os/exec"
 
-	"github.com/Pauloo27/mail-notifier/gui/utils"
 	"github.com/Pauloo27/mail-notifier/core/provider"
+	"github.com/Pauloo27/mail-notifier/gui/utils"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
@@ -14,7 +14,7 @@ var (
 	mainContainer *gtk.Grid
 )
 
-func asyncLoad(container *gtk.Grid, mail provider.MailProvider, messages []provider.MailMessage) {
+func asyncLoad(container *gtk.Grid, mail provider.MailBox, messages []provider.MailMessage) {
 	spinner, err := gtk.SpinnerNew()
 	utils.HandleError(err)
 
@@ -43,7 +43,7 @@ func asyncLoad(container *gtk.Grid, mail provider.MailProvider, messages []provi
 
 }
 
-func createMessageItem(mail provider.MailProvider, message provider.MailMessage) *gtk.Box {
+func createMessageItem(mail provider.MailBox, message provider.MailMessage) *gtk.Box {
 	container, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 5)
 	utils.HandleError(err)
 
@@ -104,7 +104,7 @@ func createMessageItem(mail provider.MailProvider, message provider.MailMessage)
 	return container
 }
 
-func createMessageList(mail provider.MailProvider, messagesParam []provider.MailMessage) *gtk.ScrolledWindow {
+func createMessageList(mail provider.MailBox, messagesParam []provider.MailMessage) *gtk.ScrolledWindow {
 	messages = messagesParam
 
 	scroller, err := gtk.ScrolledWindowNew(nil, nil)

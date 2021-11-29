@@ -13,7 +13,7 @@ import (
 	"github.com/emersion/go-message/mail"
 )
 
-var _ provider.MailProvider = Mail{}
+var _ provider.MailBox = Mail{}
 
 type Mail struct {
 	Host, Username, Password string
@@ -25,7 +25,7 @@ type Mail struct {
 }
 
 func init() {
-	provider.Factories["imap"] = func(info map[string]interface{}) (provider.MailProvider, error) {
+	provider.Factories["imap"] = func(info map[string]interface{}) (provider.MailBox, error) {
 		return NewMail(info["host"].(string), int(info["port"].(float64)), info["username"].(string), info["password"].(string), info["url"].(string))
 	}
 }
