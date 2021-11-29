@@ -8,10 +8,12 @@ import (
 )
 
 var (
-	config  *storage.Config
-	inboxes []provider.MailBox
+	config        *storage.Config
+	inboxes       []provider.MailBox
+	inboxMessages = make(map[int]map[string]*provider.MailMessage)
 
 	ErrConfigNotLoaded = errors.New("config not loaded")
+	ErrInvalidInbox    = errors.New("invalid inbox")
 )
 
 func LoadConfig() (err error) {
@@ -23,12 +25,13 @@ func ConnectToInboxes() (err error) {
 	if config == nil {
 		return ErrConfigNotLoaded
 	}
-	for _, p := range config.Providers {
+	for i, p := range config.Providers {
 		inbox, err := provider.Factories[p.Type](p.Info)
 		if err != nil {
 			return err
 		}
 		inboxes = append(inboxes, inbox)
+		inboxMessages[i] = make(map[string]*provider.MailMessage)
 	}
 	return nil
 }
@@ -38,4 +41,36 @@ func GetInboxes() ([]provider.MailBox, error) {
 		return nil, ErrConfigNotLoaded
 	}
 	return inboxes, nil
+}
+
+func fetchMessage(inboxID int, messageID string) error {
+	if config == nil {
+		return ErrConfigNotLoaded
+	}
+	if inboxID == len(inboxes) {
+		return ErrInvalidInbox
+	}
+	inbox := inboxes[inboxID]
+	msg, err := inbox.FetchMessage(messageID)
+	if err != nil {
+		return err
+	}
+	inboxMessages[inboxID][messageID] = &msg
+	return nil
+}
+
+func GetMessage(inboxID int, messageID string) (*provider.MailMessage, error) {
+	inbox, found := inboxMessages[inboxID]
+	if !found {
+		return nil, ErrInvalidInbox
+	}
+	message, found := inbox[messageID]
+	if !found {
+		err := fetchMessage(inboxID, messageID)
+		if err != nil {
+			return nil, err
+		}
+		return GetMessage(inboxID, messageID)
+	}
+	return message, nil
 }
