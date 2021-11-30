@@ -10,10 +10,10 @@
     - [o] trigger "force update"
     - [X] handle new connections
     - [X] handle requests (see #format):
-    - [.] commands:
+    - [o] commands:
       - [X] list inboxes
+      - [X] fetch message
       - [ ] fetch unread messages (per inbox/all)
-      - [ ] fetch message
 - [ ] cli:
   - [ ] polybar integration
 - [ ] gui:
