@@ -6,17 +6,13 @@ import (
 
 	"github.com/Pauloo27/mail-notifier/core/provider"
 	"github.com/Pauloo27/mail-notifier/core/storage"
+	"github.com/Pauloo27/mail-notifier/socket/common/types"
 )
-
-type CachedMailMessage struct {
-	provider.MailMessage
-	FechedAt time.Time
-}
 
 var (
 	config        *storage.Config
 	inboxes       []provider.MailBox
-	inboxMessages = make(map[int]map[string]*CachedMailMessage)
+	inboxMessages = make(map[int]map[string]*types.CachedMailMessage)
 
 	ErrConfigNotLoaded = errors.New("config not loaded")
 	ErrInvalidInbox    = errors.New("invalid inbox")
@@ -37,7 +33,7 @@ func ConnectToInboxes() (err error) {
 			return err
 		}
 		inboxes = append(inboxes, inbox)
-		inboxMessages[i] = make(map[string]*CachedMailMessage)
+		inboxMessages[i] = make(map[string]*types.CachedMailMessage)
 	}
 	return nil
 }
@@ -61,14 +57,14 @@ func fetchMessage(inboxID int, messageID string) error {
 	if err != nil {
 		return err
 	}
-	inboxMessages[inboxID][messageID] = &CachedMailMessage{
+	inboxMessages[inboxID][messageID] = &types.CachedMailMessage{
 		MailMessage: msg,
 		FechedAt:    time.Now(),
 	}
 	return nil
 }
 
-func GetMessage(inboxID int, messageID string) (*CachedMailMessage, error) {
+func GetMessage(inboxID int, messageID string) (*types.CachedMailMessage, error) {
 	inbox, found := inboxMessages[inboxID]
 	if !found {
 		return nil, ErrInvalidInbox
