@@ -25,7 +25,11 @@ func handleCommand(line string) *common.Response {
 			Error: errors.New("command not found"),
 		}
 	}
-	return handler(command, args)
+	data, err := handler(command, args)
+	return &common.Response{
+		Data:  data,
+		Error: err,
+	}
 }
 
 func handleConnection(conn net.Conn) error {
