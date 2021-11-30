@@ -17,9 +17,3 @@ func (r *Response) MarshalJSON() ([]byte, error) {
 		"error": err,
 	})
 }
-
-/* TODO
-func (r *Response) UnmarshalJSON() ([]byte, error) {
-	return nil, nil
-}
-*/

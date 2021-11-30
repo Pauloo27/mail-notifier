@@ -10,9 +10,10 @@ import (
 )
 
 var (
-	config        *storage.Config
-	inboxes       []provider.MailBox
-	inboxMessages = make(map[int]map[string]*types.CachedMailMessage)
+	config         *storage.Config
+	inboxes        []provider.MailBox
+	inboxMessages  = make(map[int]map[string]*types.CachedMailMessage)
+	unreadMessages = make(map[int]*types.CachedUnreadMessages)
 
 	ErrConfigNotLoaded = errors.New("config not loaded")
 	ErrInvalidInbox    = errors.New("invalid inbox")
@@ -78,4 +79,48 @@ func GetMessage(inboxID int, messageID string) (*types.CachedMailMessage, error)
 		return GetMessage(inboxID, messageID)
 	}
 	return message, nil
+}
+
+func fetchUnreadMessage(inboxID int) error {
+	if config == nil {
+		return ErrConfigNotLoaded
+	}
+	if inboxID == len(inboxes) {
+		return ErrInvalidInbox
+	}
+	inbox := inboxes[inboxID]
+
+	msgs, err := inbox.FetchUnreadMessages()
+	if err != nil {
+		return err
+	}
+
+	var unreadMsgs []*types.CachedMailMessage
+
+	for _, msg := range msgs {
+		unreadMsg, err := GetMessage(inboxID, msg.GetID())
+		if err != nil {
+			return err
+		}
+		unreadMsgs = append(unreadMsgs, unreadMsg)
+	}
+
+	unreadMessages[inboxID] = &types.CachedUnreadMessages{
+		Messages: unreadMsgs,
+		FechedAt: time.Now(),
+	}
+
+	return nil
+}
+
+func GetUnreadMessagesIn(inboxID int) (*types.CachedUnreadMessages, error) {
+	unreadMessages, found := unreadMessages[inboxID]
+	if !found {
+		err := fetchUnreadMessage(inboxID)
+		if err != nil {
+			return nil, err
+		}
+		return GetUnreadMessagesIn(inboxID)
+	}
+	return unreadMessages, nil
 }

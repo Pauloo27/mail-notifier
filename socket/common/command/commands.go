@@ -17,3 +17,9 @@ var FetchMessageCommand = &Command{
 	Usage:       "fetch_message [inbox id] [message id]",
 	Description: "fetch a message from an inbox",
 }
+
+var FetchUnreadMessagesIn = &Command{
+	Name:        "fetch_unread_messages_in",
+	Usage:       "fetch_unread_messages_in [inbox id]",
+	Description: "fetch unread messages from an inbox",
+}
