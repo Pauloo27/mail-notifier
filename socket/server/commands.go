@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Pauloo27/mail-notifier/socket/common/command"
+	"github.com/Pauloo27/mail-notifier/socket/common/types"
 	"github.com/Pauloo27/mail-notifier/socket/server/data"
 )
 
@@ -24,15 +25,15 @@ func echoCommand(command string, args []string) (interface{}, error) {
 func listInboxes(command string, args []string) (interface{}, error) {
 	inboxes, err := data.GetInboxes()
 
-	var d []map[string]interface{}
+	var i types.Inboxes
 
 	for _, inbox := range inboxes {
-		d = append(d, map[string]interface{}{
-			"address": inbox.GetAddress(),
+		i = append(i, &types.Inbox{
+			MailBox: inbox,
 		})
 	}
 
-	return d, err
+	return i, err
 }
 
 func fetchMessage(command string, args []string) (interface{}, error) {
