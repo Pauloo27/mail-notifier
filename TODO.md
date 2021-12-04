@@ -6,15 +6,15 @@
   - [ ] socket client:
     - [ ] command sender
     - [ ] accept "force update" command
-  - [o] socket server:
+  - [O] socket server:
     - [o] trigger "force update"
     - [X] handle new connections
     - [X] handle requests (see #format):
     - [ ] auto refresh cache
-    - [o] commands:
+    - [X] commands:
       - [X] list inboxes
       - [X] fetch message
-      - [ ] fetch unread messages (per inbox/all)
+      - [X] fetch unread messages (per inbox/all)
 - [ ] cli:
   - [ ] polybar integration
 - [ ] gui:
