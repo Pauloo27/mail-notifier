@@ -3,8 +3,10 @@ module github.com/Pauloo27/mail-notifier
 go 1.17
 
 require (
+	github.com/Pauloo27/logger v0.0.0-20211021033456-da9262f8be0f
 	github.com/emersion/go-imap v1.2.0
 	github.com/emersion/go-message v0.15.0
+	github.com/google/uuid v1.3.0
 	github.com/gotk3/gotk3 v0.6.1
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	google.golang.org/api v0.30.0
