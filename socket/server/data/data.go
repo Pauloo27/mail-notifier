@@ -113,6 +113,18 @@ func fetchUnreadMessage(inboxID int) error {
 	return nil
 }
 
+func GetAllUnreadMessages() ([]*types.CachedUnreadMessages, error) {
+	var messages []*types.CachedUnreadMessages
+	for i := range inboxes {
+		msgs, err := GetUnreadMessagesIn(i)
+		if err != nil {
+			return nil, err
+		}
+		messages = append(messages, msgs)
+	}
+	return messages, nil
+}
+
 func GetUnreadMessagesIn(inboxID int) (*types.CachedUnreadMessages, error) {
 	unreadMessages, found := unreadMessages[inboxID]
 	if !found {

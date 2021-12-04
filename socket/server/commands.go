@@ -13,10 +13,11 @@ import (
 type handlerFunction func(command string, args []string) (data interface{}, err error)
 
 var commandMap = map[string]handlerFunction{
-	command.EchoCommand.Name:           echoCommand,
-	command.ListInboxesCommand.Name:    listInboxes,
-	command.FetchMessageCommand.Name:   fetchMessage,
-	command.FetchUnreadMessagesIn.Name: fetchUnreadMessagesIn,
+	command.EchoCommand.Name:            echoCommand,
+	command.ListInboxesCommand.Name:     listInboxes,
+	command.FetchMessageCommand.Name:    fetchMessage,
+	command.FetchUnreadMessagesIn.Name:  fetchUnreadMessagesIn,
+	command.FetchAllUnreadMessages.Name: fetchAllUnreadMessages,
 }
 
 func echoCommand(command string, args []string) (interface{}, error) {
@@ -54,6 +55,14 @@ func fetchMessage(command string, args []string) (interface{}, error) {
 	}
 
 	return msg, err
+}
+
+func fetchAllUnreadMessages(command string, args []string) (interface{}, error) {
+	msgs, err := data.GetAllUnreadMessages()
+	if err != nil {
+		return nil, err
+	}
+	return msgs, err
 }
 
 func fetchUnreadMessagesIn(command string, args []string) (interface{}, error) {
