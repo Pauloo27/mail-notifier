@@ -5,29 +5,28 @@ import (
 	"encoding/json"
 	"errors"
 	"net"
-	"sync"
 
 	"github.com/Pauloo27/mail-notifier/socket/common"
 	"github.com/Pauloo27/mail-notifier/socket/common/command"
+	"github.com/Pauloo27/mail-notifier/socket/common/transport"
 	"github.com/Pauloo27/mail-notifier/socket/common/types"
 )
 
 var (
 	conn net.Conn
-	rw   *bufio.ReadWriter
-	lock *sync.Mutex
+	t    *transport.Transport
 )
 
 func Connect() error {
 	var err error
 	conn, err = net.Dial("unix", common.SocketPath)
-	rw = bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
-	lock = &sync.Mutex{}
+	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
+	t = transport.NewTransport(rw)
 	return err
 }
 
 func ListInboxes() ([]*types.Inbox, error) {
-	res, err := SendCommand(command.ListInboxesCommand.Name)
+	res, err := SendCommand(command.ListInboxesCommand.Name, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -51,22 +50,12 @@ func ListInboxes() ([]*types.Inbox, error) {
 	return inboxes, err
 }
 
-func SendCommand(command string) (*common.Response, error) {
-	lock.Lock()
-	defer lock.Unlock()
-	data := []byte(command)
-	w, err := rw.Write(data)
-	if err != nil {
-		return nil, err
+func SendCommand(command string, args []string) (*common.Response, error) {
+	resCh := make(chan *common.Response)
+	cb := func(res *common.Response) {
+		resCh <- res
 	}
-	if w != len(data) {
-		return nil, errors.New("something went wrong while writing")
-	}
-	responseData, err := rw.ReadString('\n')
-	if err != nil {
-		return nil, err
-	}
-	var response common.Response
-	err = json.Unmarshal([]byte(responseData), &response)
-	return &response, err
+	t.Send(command, args, cb)
+	res := <-resCh
+	return res, nil
 }

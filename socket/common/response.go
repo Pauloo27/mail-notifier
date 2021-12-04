@@ -5,6 +5,7 @@ import "encoding/json"
 type Response struct {
 	Error error       `json:"error"`
 	Data  interface{} `json:"data"`
+	To    string      `json:"to"`
 }
 
 func (r *Response) MarshalJSON() ([]byte, error) {
@@ -14,6 +15,7 @@ func (r *Response) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(map[string]interface{}{
 		"data":  r.Data,
+		"to":    r.To,
 		"error": err,
 	})
 }

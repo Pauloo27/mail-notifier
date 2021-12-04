@@ -2,56 +2,29 @@ package server
 
 import (
 	"bufio"
-	"encoding/json"
 	"errors"
 	"net"
 	"os"
-	"strings"
 
+	"github.com/Pauloo27/logger"
 	"github.com/Pauloo27/mail-notifier/socket/common"
+	"github.com/Pauloo27/mail-notifier/socket/common/transport"
 )
 
-func handleCommand(line string) *common.Response {
-	line = strings.ToLower(line)
-	parts := strings.Split(line, " ")
-	command := parts[0]
-	var args []string
-	if len(parts) > 1 {
-		args = parts[1:]
-	}
+func handleCommand(command string, args []string) (interface{}, error) {
 	handler, ok := commandMap[command]
 	if !ok {
-		return &common.Response{
-			Error: errors.New("command not found"),
-		}
+		return nil, errors.New("command not found")
 	}
-	data, err := handler(command, args)
-	return &common.Response{
-		Data:  data,
-		Error: err,
-	}
+	return handler(command, args)
 }
 
 func handleConnection(conn net.Conn) error {
 	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
-	for {
-		line, err := rw.ReadString('\n')
-		if err != nil {
-			return err
-		}
-		response := handleCommand(strings.TrimSuffix(line, "\n"))
-		jsonResponse, err := json.Marshal(response)
-		if err != nil {
-			return err
-		}
-		jsonResponse = append(jsonResponse, '\n')
-		if _, err = rw.Write(jsonResponse); err != nil {
-			return err
-		}
-		if err = rw.Flush(); err != nil {
-			return err
-		}
-	}
+	transport := transport.NewTransport(rw)
+	return transport.Start(func(req *common.Request) (interface{}, error) {
+		return handleCommand(req.Command, req.Args)
+	})
 }
 
 func acceptNewConnections(l net.Listener) error {
@@ -60,7 +33,12 @@ func acceptNewConnections(l net.Listener) error {
 		if err != nil {
 			return err
 		}
-		go handleConnection(conn) // TODO: handle error?
+		go func() {
+			err := handleConnection(conn)
+			if err != nil {
+				logger.Error(err)
+			}
+		}()
 	}
 }
 
