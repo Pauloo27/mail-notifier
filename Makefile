@@ -16,6 +16,10 @@ build-gui:
 run-daemon: build-daemon
 	./$(DAEMON_BINARY_NAME)
 
+.PHONY: run-gui
+run-gui: build-gui
+	./$(GUI_BINARY_NAME)
+
 .PHONY: tidy
 tidy:
 	go mod tidy
