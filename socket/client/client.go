@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"net"
+	"strconv"
 
 	"github.com/Pauloo27/mail-notifier/socket/common"
 	"github.com/Pauloo27/mail-notifier/socket/common/command"
@@ -40,6 +41,20 @@ func ListInboxes() ([]*types.Inbox, error) {
 	}
 	err = json.Unmarshal(rawData, &inboxes)
 	return inboxes, err
+}
+
+func FetchUnreadMessagesIn(id int) (*types.CachedUnreadMessages, error) {
+	res, err := SendCommand(command.FetchUnreadMessagesIn.Name, []string{strconv.Itoa(id)})
+	if err != nil {
+		return nil, err
+	}
+	var unread types.CachedUnreadMessages
+	rawData, err := json.Marshal(res.Data)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(rawData, &unread)
+	return &unread, err
 }
 
 func SendCommand(command string, args []string) (*common.Response, error) {

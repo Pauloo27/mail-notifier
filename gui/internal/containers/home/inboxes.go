@@ -1,41 +1,29 @@
 package home
 
 import (
-	"os/exec"
 	"strconv"
 
-	"github.com/Pauloo27/mail-notifier/core/provider"
-	"github.com/Pauloo27/mail-notifier/gui/internal/config"
 	"github.com/Pauloo27/mail-notifier/gui/internal/containers/inbox"
 	"github.com/Pauloo27/mail-notifier/gui/utils"
+	"github.com/Pauloo27/mail-notifier/socket/client"
+	"github.com/Pauloo27/mail-notifier/socket/common/types"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func createInboxItem(mail provider.MailBox, messages []provider.MailMessage) *gtk.Box {
+func createInboxItem(box *types.Inbox, messages *types.CachedUnreadMessages) *gtk.Box {
 	container, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 5)
 	utils.HandleError(err)
 
-	ok := mail != nil
-
-	address := "invalid"
-	if ok {
-		address = mail.GetAddress()
-	}
+	address := box.Address
 
 	emailLbl, err := gtk.LabelNew(address)
 	utils.HandleError(err)
 
-	unreadLbl, err := gtk.LabelNew(strconv.Itoa(len(messages)))
+	unreadLbl, err := gtk.LabelNew(strconv.Itoa(len(messages.Messages)))
 	utils.HandleError(err)
 
-	var iconName string
-
-	if ok {
-		iconName = "go-next"
-	} else {
-		iconName = "security-low"
-	}
+	iconName := "go-next"
 
 	seeMoreBtn, err := gtk.ButtonNewFromIconName(iconName, gtk.ICON_SIZE_BUTTON)
 	utils.HandleError(err)
@@ -43,7 +31,7 @@ func createInboxItem(mail provider.MailBox, messages []provider.MailMessage) *gt
 	seeMoreBtn.SetTooltipText("List messages")
 
 	seeMoreBtn.Connect("clicked", func() {
-		inbox.Show(mail, messages)
+		inbox.Show(box, messages)
 	})
 
 	openBtn, err := gtk.ButtonNewFromIconName("go-up", gtk.ICON_SIZE_BUTTON)
@@ -52,12 +40,9 @@ func createInboxItem(mail provider.MailBox, messages []provider.MailMessage) *gt
 	openBtn.SetTooltipText("Open inbox on browser")
 
 	openBtn.Connect("clicked", func() {
-		if !ok {
-			return
-		}
-		url := mail.GetWebURL()
+		//url := mail.GetWebURL()
 		// TODO: cross platform?
-		_ = exec.Command("xdg-open", url).Start()
+		//_ = exec.Command("xdg-open", url).Start()
 	})
 
 	container.PackStart(emailLbl, false, false, 0)
@@ -90,26 +75,24 @@ func createInboxList() *gtk.ScrolledWindow {
 	container.Attach(spinner, 0, 0, 1, 1)
 
 	go func() {
-		var loadedMails []provider.MailBox
-		var messages [][]provider.MailMessage
+		var messages []*types.CachedUnreadMessages
 
-		for _, p := range config.Config.Providers {
-			mail, err := provider.Factories[p.Type](p.Info)
-			if err == nil {
-				mailMessages, err := mail.FetchUnreadMessages()
-				if err == nil {
-					loadedMails = append(loadedMails, mail)
-					messages = append(messages, mailMessages)
-					continue
-				}
+		inboxes, err := client.ListInboxes()
+		if err != nil {
+			panic(err)
+		}
+
+		for i := range inboxes {
+			msgs, err := client.FetchUnreadMessagesIn(i)
+			messages = append(messages, msgs)
+			if err != nil {
+				panic(err)
 			}
-			loadedMails = append(loadedMails, nil)
-			messages = append(messages, nil)
 		}
 
 		glib.IdleAdd(func() {
 			spinner.Destroy()
-			for i, m := range loadedMails {
+			for i, m := range inboxes {
 				container.Attach(createInboxItem(m, messages[i]), 0, i, 1, 1)
 			}
 			container.ShowAll()

@@ -3,18 +3,18 @@ package inbox
 import (
 	"os/exec"
 
-	"github.com/Pauloo27/mail-notifier/core/provider"
 	"github.com/Pauloo27/mail-notifier/gui/utils"
+	"github.com/Pauloo27/mail-notifier/socket/common/types"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
 
 var (
-	messages      []provider.MailMessage
+	messages      *types.CachedUnreadMessages
 	mainContainer *gtk.Grid
 )
 
-func asyncLoad(container *gtk.Grid, mail provider.MailBox, messages []provider.MailMessage) {
+func asyncLoad(container *gtk.Grid, box *types.Inbox, messages *types.CachedUnreadMessages) {
 	spinner, err := gtk.SpinnerNew()
 	utils.HandleError(err)
 
@@ -23,9 +23,6 @@ func asyncLoad(container *gtk.Grid, mail provider.MailBox, messages []provider.M
 	container.Attach(spinner, 0, 0, 1, 1)
 
 	go func() {
-		for _, message := range messages {
-			_ = message.GetFrom() // Just to trigger the lazy load
-		}
 		glib.IdleAdd(func() {
 			children := container.GetChildren()
 
@@ -34,8 +31,8 @@ func asyncLoad(container *gtk.Grid, mail provider.MailBox, messages []provider.M
 				wid.Destroy()
 			})
 
-			for i, message := range messages {
-				container.Attach(createMessageItem(mail, message), 0, i, 1, 1)
+			for i, message := range messages.Messages {
+				container.Attach(createMessageItem(box, message), 0, i, 1, 1)
 			}
 			container.ShowAll()
 		})
@@ -43,18 +40,18 @@ func asyncLoad(container *gtk.Grid, mail provider.MailBox, messages []provider.M
 
 }
 
-func createMessageItem(mail provider.MailBox, message provider.MailMessage) *gtk.Box {
+func createMessageItem(box *types.Inbox, message *types.CachedMailMessage) *gtk.Box {
 	container, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 5)
 	utils.HandleError(err)
 
 	leftContainer, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 5)
 	utils.HandleError(err)
 
-	subjectLbl, err := gtk.LabelNew(utils.AddEllipsis(message.GetSubject(), 40))
+	subjectLbl, err := gtk.LabelNew(utils.AddEllipsis(message.Subject, 40))
 	utils.HandleError(err)
 	subjectLbl.SetHAlign(gtk.ALIGN_START)
 
-	fromLbl, err := gtk.LabelNew(utils.AddEllipsis(message.GetFrom(), 30))
+	fromLbl, err := gtk.LabelNew(utils.AddEllipsis(message.From, 30))
 	utils.HandleError(err)
 	fromLbl.SetHAlign(gtk.ALIGN_START)
 
@@ -67,19 +64,21 @@ func createMessageItem(mail provider.MailBox, message provider.MailMessage) *gtk
 	markAsReadBtn.SetVAlign(gtk.ALIGN_CENTER)
 
 	markAsReadBtn.Connect("clicked", func() {
-		var newMessages []provider.MailMessage
-		for _, m := range messages {
-			if m.GetID() != message.GetID() {
+		var newMessages []*types.CachedMailMessage
+		for _, m := range messages.Messages {
+			if m.ID != message.ID {
 				newMessages = append(newMessages, m)
 			}
 		}
-		messages = newMessages
-		asyncLoad(mainContainer, mail, messages)
+		messages.Messages = newMessages
+		asyncLoad(mainContainer, box, messages)
 		go func() {
-			err := mail.MarkMessageAsRead(message.GetID())
+			/* FIXME
+			err := box.MarkMessageAsRead(message.GetID())
 			if err != nil {
-				panic(err) // FIXME
+				panic(err)
 			}
+			*/
 		}()
 	})
 
@@ -92,7 +91,8 @@ func createMessageItem(mail provider.MailBox, message provider.MailMessage) *gtk
 	openBtn.SetVAlign(gtk.ALIGN_CENTER)
 
 	openBtn.Connect("clicked", func() {
-		url := mail.GetWebURL()
+		//url := mail.GetWebURL()
+		url := "" // FIXME
 		// TODO: cross platform?
 		_ = exec.Command("xdg-open", url).Start()
 	})
@@ -104,7 +104,7 @@ func createMessageItem(mail provider.MailBox, message provider.MailMessage) *gtk
 	return container
 }
 
-func createMessageList(mail provider.MailBox, messagesParam []provider.MailMessage) *gtk.ScrolledWindow {
+func createMessageList(box *types.Inbox, messagesParam *types.CachedUnreadMessages) *gtk.ScrolledWindow {
 	messages = messagesParam
 
 	scroller, err := gtk.ScrolledWindowNew(nil, nil)
@@ -120,7 +120,7 @@ func createMessageList(mail provider.MailBox, messagesParam []provider.MailMessa
 	mainContainer.SetMarginStart(5)
 	mainContainer.SetMarginEnd(5)
 
-	asyncLoad(mainContainer, mail, messages)
+	asyncLoad(mainContainer, box, messages)
 
 	return scroller
 }
