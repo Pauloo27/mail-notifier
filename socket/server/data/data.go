@@ -59,8 +59,12 @@ func fetchMessage(inboxID int, messageID string) error {
 		return err
 	}
 	inboxMessages[inboxID][messageID] = &types.CachedMailMessage{
-		MailMessage: msg,
-		FechedAt:    time.Now(),
+		ID:       msg.GetID(),
+		From:     msg.GetFrom(),
+		To:       msg.GetTo(),
+		Subject:  msg.GetSubject(),
+		Date:     msg.GetDate(),
+		FechedAt: time.Now(),
 	}
 	return nil
 }
