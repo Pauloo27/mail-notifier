@@ -9,9 +9,10 @@ import (
 )
 
 func main() {
-	err := client.Connect()
+	c := client.NewClient()
+	err := c.Connect()
 	if err != nil {
 		panic(err)
 	}
-	home.Show()
+	home.Show(c)
 }

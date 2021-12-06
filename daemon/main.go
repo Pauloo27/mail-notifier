@@ -17,8 +17,9 @@ func main() {
 	if err := data.ConnectToInboxes(); err != nil {
 		panic(err)
 	}
+	sv := server.NewServer()
 	fmt.Println("Config loaded!")
-	if err := server.Listen(); err != nil {
+	if err := sv.Listen(); err != nil {
 		panic(err)
 	}
 }

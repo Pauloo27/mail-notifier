@@ -2,10 +2,11 @@ package home
 
 import (
 	"github.com/Pauloo27/mail-notifier/gui/utils"
+	"github.com/Pauloo27/mail-notifier/socket/client"
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func Show() {
+func Show(c *client.Client) {
 	gtk.Init(nil)
 
 	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
@@ -19,7 +20,7 @@ func Show() {
 	utils.HandleError(err)
 
 	mainContainer.PackStart(createHeader(), false, false, 5)
-	mainContainer.PackStart(createInboxList(), true, true, 5)
+	mainContainer.PackStart(createInboxList(c), true, true, 5)
 
 	win.Add(mainContainer)
 

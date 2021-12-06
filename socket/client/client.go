@@ -17,7 +17,13 @@ var (
 	t    *transport.Transport
 )
 
-func Connect() error {
+type Client struct{}
+
+func NewClient() *Client {
+	return &Client{}
+}
+
+func (c *Client) Connect() error {
 	var err error
 	conn, err = net.Dial("unix", common.SocketPath)
 	if err != nil {
@@ -29,8 +35,8 @@ func Connect() error {
 	return nil
 }
 
-func ListInboxes() ([]*types.Inbox, error) {
-	res, err := SendCommand(command.ListInboxesCommand.Name, nil)
+func (c *Client) ListInboxes() ([]*types.Inbox, error) {
+	res, err := c.sendCommand(command.ListInboxesCommand.Name, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -43,8 +49,8 @@ func ListInboxes() ([]*types.Inbox, error) {
 	return inboxes, err
 }
 
-func FetchUnreadMessagesIn(id int) (*types.CachedUnreadMessages, error) {
-	res, err := SendCommand(command.FetchUnreadMessagesIn.Name, []string{strconv.Itoa(id)})
+func (c *Client) FetchUnreadMessagesIn(id int) (*types.CachedUnreadMessages, error) {
+	res, err := c.sendCommand(command.FetchUnreadMessagesIn.Name, []string{strconv.Itoa(id)})
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +63,7 @@ func FetchUnreadMessagesIn(id int) (*types.CachedUnreadMessages, error) {
 	return &unread, err
 }
 
-func SendCommand(command string, args []string) (*common.Response, error) {
+func (c *Client) sendCommand(command string, args []string) (*common.Response, error) {
 	resCh := make(chan *common.Response)
 	cb := func(res *common.Response) {
 		resCh <- res

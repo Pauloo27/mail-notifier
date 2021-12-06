@@ -11,6 +11,13 @@ import (
 	"github.com/Pauloo27/mail-notifier/socket/common/transport"
 )
 
+type Server struct {
+}
+
+func NewServer() *Server {
+	return &Server{}
+}
+
 func handleCommand(command string, args []string) (interface{}, error) {
 	handler, ok := commandMap[command]
 	if !ok {
@@ -19,7 +26,7 @@ func handleCommand(command string, args []string) (interface{}, error) {
 	return handler(command, args)
 }
 
-func handleConnection(conn net.Conn) error {
+func (s *Server) handleConnection(conn net.Conn) error {
 	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
 	transport := transport.NewTransport(rw)
 	return transport.Start(func(req *common.Request) (interface{}, error) {
@@ -27,14 +34,14 @@ func handleConnection(conn net.Conn) error {
 	})
 }
 
-func acceptNewConnections(l net.Listener) error {
+func (s *Server) acceptNewConnections(l net.Listener) error {
 	for {
 		conn, err := l.Accept()
 		if err != nil {
 			return err
 		}
 		go func() {
-			err := handleConnection(conn)
+			err := s.handleConnection(conn)
 			if err != nil {
 				logger.Error(err)
 			}
@@ -42,7 +49,7 @@ func acceptNewConnections(l net.Listener) error {
 	}
 }
 
-func Listen() error {
+func (s *Server) Listen() error {
 	os.MkdirAll(common.SocketPathRootDir, 0700)
 	if _, err := os.Stat(common.SocketPath); !os.IsNotExist(err) {
 		os.Remove(common.SocketPath)
@@ -51,5 +58,5 @@ func Listen() error {
 	if err != nil {
 		return err
 	}
-	return acceptNewConnections(l)
+	return s.acceptNewConnections(l)
 }

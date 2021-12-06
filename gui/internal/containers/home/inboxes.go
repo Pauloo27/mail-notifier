@@ -53,7 +53,7 @@ func createInboxItem(box *types.Inbox, messages *types.CachedUnreadMessages) *gt
 	return container
 }
 
-func createInboxList() *gtk.ScrolledWindow {
+func createInboxList(c *client.Client) *gtk.ScrolledWindow {
 	scroller, err := gtk.ScrolledWindowNew(nil, nil)
 	utils.HandleError(err)
 
@@ -77,13 +77,13 @@ func createInboxList() *gtk.ScrolledWindow {
 	go func() {
 		var messages []*types.CachedUnreadMessages
 
-		inboxes, err := client.ListInboxes()
+		inboxes, err := c.ListInboxes()
 		if err != nil {
 			panic(err)
 		}
 
 		for i := range inboxes {
-			msgs, err := client.FetchUnreadMessagesIn(i)
+			msgs, err := c.FetchUnreadMessagesIn(i)
 			messages = append(messages, msgs)
 			if err != nil {
 				panic(err)
