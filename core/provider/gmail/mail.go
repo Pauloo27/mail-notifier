@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
 	"time"
 
 	"github.com/Pauloo27/mail-notifier/core/provider"
@@ -21,6 +22,10 @@ type Gmail struct {
 	mailAddress string
 	userID      int
 }
+
+var (
+	mailAddressRegex = regexp.MustCompile(`(<(\S+@\S+)>)`)
+)
 
 func init() {
 	provider.Factories["gmail"] = func(info map[string]interface{}) (provider.MailBox, error) {
@@ -57,15 +62,22 @@ func (m Gmail) FetchMessage(id string) (message provider.MailMessage, err error)
 	if err != nil {
 		return
 	}
-	var from, to, subject string
+	var from, subject string
+	var to []string
 	for _, m := range msg.Payload.Headers {
 		switch m.Name {
 		case "Subject":
 			subject = m.Value
 		case "From":
-			from = m.Value
+			from = mailAddressRegex.FindAllStringSubmatch(m.Value, 1)[0][2]
 		case "To":
-			to = m.Value
+			matches := mailAddressRegex.FindAllStringSubmatch(m.Value, -1)
+			for _, match := range matches {
+				to = append(to, match[2])
+			}
+			if len(to) == 0 {
+				to = []string{m.Value}
+			}
 		}
 	}
 	message = GmailMessage{
@@ -75,7 +87,7 @@ func (m Gmail) FetchMessage(id string) (message provider.MailMessage, err error)
 			loaded:  true,
 			subject: subject,
 			from:    from,
-			to:      []string{to}, // FIXME
+			to:      to,
 			date:    time.Unix(msg.InternalDate/1000, 0),
 		},
 	}

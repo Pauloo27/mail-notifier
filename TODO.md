@@ -3,8 +3,8 @@
 - [.] daemon:
   - [ ] encrypt token/user/password
   - [ ] use generics (go 1.18) for a serialization func
-  - [ ] socket client:
-    - [ ] command sender
+  - [o] socket client:
+    - [X] command sender
     - [ ] accept "force update" command
   - [O] socket server:
     - [o] trigger "force update"
@@ -36,8 +36,8 @@
 - [O] core:
   - [X] create provider interface
   - [X] mark as read interface
-  - [.] gmail:
-    - [ ] parse mail to list with regex?
+  - [o] gmail:
+    - [X] parse mail to list with regex?
     - [X] mark as read
     - [ ] batch-get messages?
   - [o] imap:
