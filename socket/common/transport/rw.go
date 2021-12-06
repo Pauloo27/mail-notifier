@@ -19,8 +19,9 @@ type Transport struct {
 
 func NewTransport(rw *bufio.ReadWriter) *Transport {
 	return &Transport{
-		rw:        rw,
-		writeLock: &sync.Mutex{},
+		rw:              rw,
+		writeLock:       &sync.Mutex{},
+		pendingRequests: make(map[string]ResponseCallback),
 	}
 }
 
