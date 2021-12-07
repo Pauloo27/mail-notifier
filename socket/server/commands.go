@@ -30,8 +30,9 @@ func listInboxes(command string, args []string) (interface{}, error) {
 
 	var i types.Inboxes
 
-	for _, inbox := range inboxes {
+	for id, inbox := range inboxes {
 		i = append(i, &types.Inbox{
+			ID:      id,
 			Address: inbox.GetAddress(),
 			WebURL:  inbox.GetWebURL(),
 		})
@@ -67,7 +68,7 @@ func fetchAllUnreadMessages(command string, args []string) (interface{}, error) 
 	return msgs, err
 }
 
-func markMessagesAsRead(command string, args []string) (interface{}, error) {
+func markMessageAsRead(command string, args []string) (interface{}, error) {
 	if len(args) != 2 {
 		return nil, fmt.Errorf("invalid argument size: %d", len(args))
 	}
