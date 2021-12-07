@@ -54,5 +54,5 @@ interpreted as a command. The available commands are:
 - `fetch_message [inbox_id] [id]`: return the data for a single message.
 - `fetch_unread_messages_in [id]`: return unread messages for a inboxes.
 - `fetch_all_unread_messages [id]`: return unread messages for all inboxes.
-- `mark_as_message [inbox_id] [id]`: return the data for a single message.
+- `mark_message_as_read [inbox_id] [id]`: mark a message as read.
 - `refresh_inbox [inbox_id]`: return the data for a single message.
