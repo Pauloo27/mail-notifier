@@ -1,48 +1,27 @@
 # To-Do
 
-- [.] daemon:
+- [ ] client:
+  - [ ] handle server not running/connection lost
+- [ ] daemon:
   - [ ] encrypt token/user/password
   - [ ] use generics (go 1.18) for a serialization func
-  - [o] socket client:
-    - [X] command sender
+  - [ ] socket client:
     - [ ] accept "force update" command
-  - [O] socket server:
-    - [o] trigger "force update"
-    - [X] handle new connections
-    - [X] handle requests (see #format):
+  - [ ] socket server:
+    - [ ] trigger "force update"
     - [ ] auto refresh cache
-    - [X] commands:
-      - [X] list inboxes
-      - [X] fetch message
-      - [X] fetch unread messages (per inbox/all)
 - [ ] cli:
   - [ ] polybar integration
 - [ ] gui:
-  - [X] home page:
-    - [X] list inboxes 
-    - [X] open inbox (launch browser)
-    - [X] loading spinner
   - [ ] settings page:
     - [ ] new account btn
     - [ ] account listing (with delete button)
   - [O] inbox page:
-    - [X] list messages 
-    - [X] mark as read btn
-    - [X] loading spinner
-    - [X] async mark as read
-    - [X] add ... to long subjects
     - [ ] preview message (webview? nope. cant disable js/image load)
-    - [X] open message (launch browser)
 - [O] core:
-  - [X] create provider interface
-  - [X] mark as read interface
   - [o] gmail:
-    - [X] parse mail to list with regex?
-    - [X] mark as read
     - [ ] batch-get messages?
   - [o] imap:
-    - [X] load info from file
-    - [X] mark as read impl
     - [ ] batch-get messages?
 
 # Format
