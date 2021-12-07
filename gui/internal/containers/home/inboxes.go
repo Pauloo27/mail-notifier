@@ -12,7 +12,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func createInboxItem(box *types.Inbox, messages *types.CachedUnreadMessages) *gtk.Box {
+func createInboxItem(c *client.Client, box *types.Inbox, messages *types.CachedUnreadMessages) *gtk.Box {
 	container, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 5)
 	utils.HandleError(err)
 
@@ -32,7 +32,7 @@ func createInboxItem(box *types.Inbox, messages *types.CachedUnreadMessages) *gt
 	seeMoreBtn.SetTooltipText("List messages")
 
 	seeMoreBtn.Connect("clicked", func() {
-		inbox.Show(box, messages)
+		inbox.Show(c, box, messages)
 	})
 
 	openBtn, err := gtk.ButtonNewFromIconName("go-up", gtk.ICON_SIZE_BUTTON)
@@ -94,7 +94,7 @@ func createInboxList(c *client.Client) *gtk.ScrolledWindow {
 		glib.IdleAdd(func() {
 			spinner.Destroy()
 			for i, m := range inboxes {
-				container.Attach(createInboxItem(m, messages[i]), 0, i, 1, 1)
+				container.Attach(createInboxItem(c, m, messages[i]), 0, i, 1, 1)
 			}
 			container.ShowAll()
 		})

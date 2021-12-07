@@ -2,11 +2,12 @@ package inbox
 
 import (
 	"github.com/Pauloo27/mail-notifier/gui/utils"
+	"github.com/Pauloo27/mail-notifier/socket/client"
 	"github.com/Pauloo27/mail-notifier/socket/common/types"
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func Show(box *types.Inbox, messages *types.CachedUnreadMessages) {
+func Show(c *client.Client, box *types.Inbox, messages *types.CachedUnreadMessages) {
 	gtk.Init(nil)
 
 	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
@@ -20,7 +21,7 @@ func Show(box *types.Inbox, messages *types.CachedUnreadMessages) {
 	utils.HandleError(err)
 
 	mainContainer.PackStart(createHeader(box, win), false, false, 5)
-	mainContainer.PackStart(createMessageList(box, messages), true, true, 5)
+	mainContainer.PackStart(createMessageList(c, box, messages), true, true, 5)
 
 	win.Add(mainContainer)
 

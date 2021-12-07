@@ -4,6 +4,7 @@ import (
 	"os/exec"
 
 	"github.com/Pauloo27/mail-notifier/gui/utils"
+	"github.com/Pauloo27/mail-notifier/socket/client"
 	"github.com/Pauloo27/mail-notifier/socket/common/types"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
@@ -14,7 +15,7 @@ var (
 	mainContainer *gtk.Grid
 )
 
-func asyncLoad(container *gtk.Grid, box *types.Inbox, messages *types.CachedUnreadMessages) {
+func asyncLoad(container *gtk.Grid, c *client.Client, box *types.Inbox, messages *types.CachedUnreadMessages) {
 	spinner, err := gtk.SpinnerNew()
 	utils.HandleError(err)
 
@@ -32,7 +33,7 @@ func asyncLoad(container *gtk.Grid, box *types.Inbox, messages *types.CachedUnre
 			})
 
 			for i, message := range messages.Messages {
-				container.Attach(createMessageItem(box, message), 0, i, 1, 1)
+				container.Attach(createMessageItem(c, box, message), 0, i, 1, 1)
 			}
 			container.ShowAll()
 		})
@@ -40,7 +41,7 @@ func asyncLoad(container *gtk.Grid, box *types.Inbox, messages *types.CachedUnre
 
 }
 
-func createMessageItem(box *types.Inbox, message *types.CachedMailMessage) *gtk.Box {
+func createMessageItem(c *client.Client, box *types.Inbox, message *types.CachedMailMessage) *gtk.Box {
 	container, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 5)
 	utils.HandleError(err)
 
@@ -71,14 +72,12 @@ func createMessageItem(box *types.Inbox, message *types.CachedMailMessage) *gtk.
 			}
 		}
 		messages.Messages = newMessages
-		asyncLoad(mainContainer, box, messages)
+		asyncLoad(mainContainer, c, box, messages)
 		go func() {
-			/* FIXME
-			err := box.MarkMessageAsRead(message.GetID())
+			err := c.MarkMessageAsRead(box.ID, message.ID)
 			if err != nil {
 				panic(err)
 			}
-			*/
 		}()
 	})
 
@@ -103,7 +102,7 @@ func createMessageItem(box *types.Inbox, message *types.CachedMailMessage) *gtk.
 	return container
 }
 
-func createMessageList(box *types.Inbox, messagesParam *types.CachedUnreadMessages) *gtk.ScrolledWindow {
+func createMessageList(c *client.Client, box *types.Inbox, messagesParam *types.CachedUnreadMessages) *gtk.ScrolledWindow {
 	messages = messagesParam
 
 	scroller, err := gtk.ScrolledWindowNew(nil, nil)
@@ -119,7 +118,7 @@ func createMessageList(box *types.Inbox, messagesParam *types.CachedUnreadMessag
 	mainContainer.SetMarginStart(5)
 	mainContainer.SetMarginEnd(5)
 
-	asyncLoad(mainContainer, box, messages)
+	asyncLoad(mainContainer, c, box, messages)
 
 	return scroller
 }
