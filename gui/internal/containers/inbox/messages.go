@@ -91,8 +91,7 @@ func createMessageItem(box *types.Inbox, message *types.CachedMailMessage) *gtk.
 	openBtn.SetVAlign(gtk.ALIGN_CENTER)
 
 	openBtn.Connect("clicked", func() {
-		//url := mail.GetWebURL()
-		url := "" // FIXME
+		url := box.WebURL
 		// TODO: cross platform?
 		_ = exec.Command("xdg-open", url).Start()
 	})

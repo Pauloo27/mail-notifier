@@ -1,6 +1,7 @@
 package home
 
 import (
+	"os/exec"
 	"strconv"
 
 	"github.com/Pauloo27/mail-notifier/gui/internal/containers/inbox"
@@ -40,9 +41,9 @@ func createInboxItem(box *types.Inbox, messages *types.CachedUnreadMessages) *gt
 	openBtn.SetTooltipText("Open inbox on browser")
 
 	openBtn.Connect("clicked", func() {
-		//url := mail.GetWebURL()
+		url := box.WebURL
 		// TODO: cross platform?
-		//_ = exec.Command("xdg-open", url).Start()
+		_ = exec.Command("xdg-open", url).Start()
 	})
 
 	container.PackStart(emailLbl, false, false, 0)

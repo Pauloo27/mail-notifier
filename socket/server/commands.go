@@ -32,6 +32,7 @@ func listInboxes(command string, args []string) (interface{}, error) {
 	for _, inbox := range inboxes {
 		i = append(i, &types.Inbox{
 			Address: inbox.GetAddress(),
+			WebURL:  inbox.GetWebURL(),
 		})
 	}
 
