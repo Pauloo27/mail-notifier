@@ -85,6 +85,14 @@ func GetMessage(inboxID int, messageID string) (*types.CachedMailMessage, error)
 	return message, nil
 }
 
+func MarkMessageAsRead(inboxID int, messageID string) error {
+	if inboxID == len(inboxes) {
+		return ErrInvalidInbox
+	}
+	inbox := inboxes[inboxID]
+	return inbox.MarkMessageAsRead(messageID)
+}
+
 func fetchUnreadMessage(inboxID int) error {
 	if config == nil {
 		return ErrConfigNotLoaded

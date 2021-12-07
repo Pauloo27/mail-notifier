@@ -40,6 +40,9 @@ func (c *Client) ListInboxes() ([]*types.Inbox, error) {
 	if err != nil {
 		return nil, err
 	}
+	if res.Error != nil {
+		return nil, res.Error
+	}
 	var inboxes []*types.Inbox
 	rawData, err := json.Marshal(res.Data)
 	if err != nil {
@@ -49,10 +52,13 @@ func (c *Client) ListInboxes() ([]*types.Inbox, error) {
 	return inboxes, err
 }
 
-func (c *Client) FetchUnreadMessagesIn(id int) (*types.CachedUnreadMessages, error) {
-	res, err := c.sendCommand(command.FetchUnreadMessagesIn.Name, []string{strconv.Itoa(id)})
+func (c *Client) FetchUnreadMessagesIn(inboxID int) (*types.CachedUnreadMessages, error) {
+	res, err := c.sendCommand(command.FetchUnreadMessagesIn.Name, []string{strconv.Itoa(inboxID)})
 	if err != nil {
 		return nil, err
+	}
+	if res.Error != nil {
+		return nil, res.Error
 	}
 	var unread types.CachedUnreadMessages
 	rawData, err := json.Marshal(res.Data)
@@ -61,6 +67,14 @@ func (c *Client) FetchUnreadMessagesIn(id int) (*types.CachedUnreadMessages, err
 	}
 	err = json.Unmarshal(rawData, &unread)
 	return &unread, err
+}
+
+func (c *Client) MarkMessageAsRead(inboxID int, messageID string) error {
+	res, err := c.sendCommand(command.MarkMessageAsRead.Name, []string{strconv.Itoa(inboxID), messageID})
+	if err != nil {
+		return err
+	}
+	return res.Error
 }
 
 func (c *Client) sendCommand(command string, args []string) (*common.Response, error) {

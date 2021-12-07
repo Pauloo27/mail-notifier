@@ -29,3 +29,9 @@ var FetchAllUnreadMessages = &Command{
 	Usage:       "fetch_all_unread_messages [inbox id]",
 	Description: "fetch unread messages from all inboxes",
 }
+
+var MarkMessageAsRead = &Command{
+	Name:        "mark_message_as_read",
+	Usage:       "mark_message_as_read [inbox id] [message id]",
+	Description: "mark a message as read",
+}
