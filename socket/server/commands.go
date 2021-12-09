@@ -19,6 +19,8 @@ var commandMap = map[string]handlerFunction{
 	command.FetchUnreadMessagesIn.Name:  fetchUnreadMessagesIn,
 	command.FetchAllUnreadMessages.Name: fetchAllUnreadMessages,
 	command.MarkMessageAsRead.Name:      markMessageAsRead,
+	command.ClearInboxCache.Name:        clearInboxCache,
+	command.ClearAllInboxesCache.Name:   clearAllInboxesCache,
 }
 
 func echoCommand(command string, args []string) (interface{}, error) {
@@ -79,6 +81,23 @@ func markMessageAsRead(command string, args []string) (interface{}, error) {
 	}
 
 	return nil, data.MarkMessageAsRead(inboxID, args[1])
+}
+
+func clearInboxCache(command string, args []string) (interface{}, error) {
+	if len(args) != 1 {
+		return nil, fmt.Errorf("invalid argument size: %d", len(args))
+	}
+
+	inboxID, err := strconv.Atoi(args[0])
+	if err != nil {
+		return nil, fmt.Errorf("invalid inbox id: %w", err)
+	}
+
+	return "ok", data.ClearInboxCache(inboxID)
+}
+
+func clearAllInboxesCache(command string, args []string) (interface{}, error) {
+	return "ok", data.ClearAllInboxesCache()
 }
 
 func fetchUnreadMessagesIn(command string, args []string) (interface{}, error) {

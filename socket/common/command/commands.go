@@ -35,3 +35,15 @@ var MarkMessageAsRead = &Command{
 	Usage:       "mark_message_as_read [inbox id] [message id]",
 	Description: "mark a message as read",
 }
+
+var ClearInboxCache = &Command{
+	Name:        "clear_inbox_cache",
+	Usage:       "clear_inbox_cache [inbox id]",
+	Description: "clear an inbox unread messages cache",
+}
+
+var ClearAllInboxesCache = &Command{
+	Name:        "clear_all_inboxes_cache",
+	Usage:       "clear_all_inboxes_cache",
+	Description: "clear all unread messages cache",
+}
