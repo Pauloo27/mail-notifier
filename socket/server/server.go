@@ -3,6 +3,7 @@ package server
 import (
 	"bufio"
 	"errors"
+	"io"
 	"net"
 	"os"
 
@@ -42,7 +43,7 @@ func (s *Server) acceptNewConnections(l net.Listener) error {
 		}
 		go func() {
 			err := s.handleConnection(conn)
-			if err != nil {
+			if err != nil && !errors.Is(err, io.EOF) {
 				logger.Error(err)
 			}
 		}()
