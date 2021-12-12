@@ -9,11 +9,16 @@ import (
 	"github.com/Pauloo27/mail-notifier/socket/common/types"
 )
 
+const (
+	refreshCacheAfter = 1 * time.Minute
+)
+
 var (
 	config         *storage.Config
 	inboxes        []provider.MailBox
 	inboxMessages  = make(map[int]map[string]*types.CachedMailMessage)
 	unreadMessages = make(map[int]*types.CachedUnreadMessages)
+	cacheTimers    = make(map[int]*time.Timer)
 
 	ErrConfigNotLoaded = errors.New("config not loaded")
 	ErrInvalidInbox    = errors.New("invalid inbox")
@@ -130,6 +135,14 @@ func fetchUnreadMessage(inboxID int) error {
 	unreadMessages[inboxID] = &types.CachedUnreadMessages{
 		Messages: unreadMsgs,
 		FechedAt: time.Now(),
+	}
+
+	_, found := cacheTimers[inboxID]
+	if !found {
+		cacheTimers[inboxID] = time.NewTimer(refreshCacheAfter)
+		go refreshCache(inboxID)
+	} else {
+		cacheTimers[inboxID].Reset(refreshCacheAfter)
 	}
 
 	return nil
