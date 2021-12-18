@@ -1,14 +1,19 @@
 GUI_BINARY_NAME = mail-notifier-gui
+CLI_BINARY_NAME = mail-notifier-cli
 DAEMON_BINARY_NAME = mail-notifier-daemon
 
 .PHONY: build
-build: build-daemon build-gui
+build: build-daemon build-gui build-cli
 
-.PHONY: daemon
+.PHONY: build-daemon
 build-daemon:
 	go build -o $(DAEMON_BINARY_NAME) -v ./daemon
 
-.PHONY: gui
+.PHONY: build-cli
+build-cli:
+	go build -o $(CLI_BINARY_NAME) -v ./cli
+
+.PHONY: build-gui
 build-gui:
 	go build -o $(GUI_BINARY_NAME) -v ./gui
 
