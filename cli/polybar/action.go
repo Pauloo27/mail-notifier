@@ -6,15 +6,15 @@ type MouseIndex uint
 
 // From https://github.com/polybar/polybar/wiki/Formatting#action-a
 const (
-	LEFT_CLICK = MouseIndex(iota + 1)
-	MIDDLE_CLICK
-	RIGHT_CLICK
-	SCROLL_UP
-	SCROLL_DOWN
+	LeftClick = MouseIndex(iota + 1)
+	MiddleClick
+	RightClick
+	ScrollUp
+	ScrollDown
 	// Double click is kinda "meh", so avoid it
-	DOUBLE_LEFT_CLICK
-	DOUBLE_MIDDLE_CLICK
-	DOUBLE_RIGHT_CLICK
+	DoubleLeftClick
+	DoubleMiddleClick
+	DoubleRightClick
 )
 
 type ActionButton struct {

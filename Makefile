@@ -25,6 +25,10 @@ run-daemon: build-daemon
 run-gui: build-gui
 	./$(GUI_BINARY_NAME)
 
+.PHONY: lint
+lint:
+	revive -formatter friendly -config revive.toml ./...
+
 .PHONY: tidy
 tidy:
 	go mod tidy
