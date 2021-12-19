@@ -10,7 +10,7 @@ import (
 	"github.com/Pauloo27/mail-notifier/socket/server/data"
 )
 
-type handlerFunction func(command string, args []string) (data interface{}, err error)
+type handlerFunction func(c *ConnectedClient, command string, args []string) (data interface{}, err error)
 
 var commandMap = map[string]handlerFunction{
 	command.EchoCommand.Name:            echoCommand,
@@ -23,11 +23,11 @@ var commandMap = map[string]handlerFunction{
 	command.ClearAllInboxesCache.Name:   clearAllInboxesCache,
 }
 
-func echoCommand(command string, args []string) (interface{}, error) {
+func echoCommand(c *ConnectedClient, command string, args []string) (interface{}, error) {
 	return strings.Join(args, " "), nil
 }
 
-func listInboxes(command string, args []string) (interface{}, error) {
+func listInboxes(c *ConnectedClient, command string, args []string) (interface{}, error) {
 	inboxes, err := data.GetInboxes()
 
 	var i types.Inboxes
@@ -43,7 +43,7 @@ func listInboxes(command string, args []string) (interface{}, error) {
 	return i, err
 }
 
-func fetchMessage(command string, args []string) (interface{}, error) {
+func fetchMessage(c *ConnectedClient, command string, args []string) (interface{}, error) {
 	if len(args) != 2 {
 		return nil, fmt.Errorf("invalid argument size: %d", len(args))
 	}
@@ -62,7 +62,7 @@ func fetchMessage(command string, args []string) (interface{}, error) {
 	return msg, err
 }
 
-func fetchAllUnreadMessages(command string, args []string) (interface{}, error) {
+func fetchAllUnreadMessages(c *ConnectedClient, command string, args []string) (interface{}, error) {
 	msgs, err := data.GetAllUnreadMessages()
 	if err != nil {
 		return nil, err
@@ -70,7 +70,7 @@ func fetchAllUnreadMessages(command string, args []string) (interface{}, error) 
 	return msgs, err
 }
 
-func markMessageAsRead(command string, args []string) (interface{}, error) {
+func markMessageAsRead(c *ConnectedClient, command string, args []string) (interface{}, error) {
 	if len(args) != 2 {
 		return nil, fmt.Errorf("invalid argument size: %d", len(args))
 	}
@@ -83,7 +83,7 @@ func markMessageAsRead(command string, args []string) (interface{}, error) {
 	return nil, data.MarkMessageAsRead(inboxID, args[1])
 }
 
-func clearInboxCache(command string, args []string) (interface{}, error) {
+func clearInboxCache(c *ConnectedClient, command string, args []string) (interface{}, error) {
 	if len(args) != 1 {
 		return nil, fmt.Errorf("invalid argument size: %d", len(args))
 	}
@@ -96,11 +96,11 @@ func clearInboxCache(command string, args []string) (interface{}, error) {
 	return "ok", data.ClearInboxCache(inboxID)
 }
 
-func clearAllInboxesCache(command string, args []string) (interface{}, error) {
+func clearAllInboxesCache(c *ConnectedClient, command string, args []string) (interface{}, error) {
 	return "ok", data.ClearAllInboxesCache()
 }
 
-func fetchUnreadMessagesIn(command string, args []string) (interface{}, error) {
+func fetchUnreadMessagesIn(c *ConnectedClient, command string, args []string) (interface{}, error) {
 	if len(args) != 1 {
 		return nil, fmt.Errorf("invalid argument size: %d", len(args))
 	}

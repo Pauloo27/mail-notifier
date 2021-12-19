@@ -25,12 +25,12 @@ func NewServer() *Server {
 	return &Server{}
 }
 
-func handleCommand(command string, args []string) (interface{}, error) {
+func handleCommand(c *ConnectedClient, command string, args []string) (interface{}, error) {
 	handler, ok := commandMap[command]
 	if !ok {
 		return nil, errors.New("command not found")
 	}
-	return handler(command, args)
+	return handler(c, command, args)
 }
 
 func (s *Server) handleConnection(conn net.Conn) (*ConnectedClient, error) {
@@ -39,7 +39,7 @@ func (s *Server) handleConnection(conn net.Conn) (*ConnectedClient, error) {
 	client := &ConnectedClient{transport, true}
 	s.clients = append(s.clients, client)
 	return client, transport.Start(func(req *common.Request) (interface{}, error) {
-		return handleCommand(req.Command, req.Args)
+		return handleCommand(client, req.Command, req.Args)
 	})
 }
 
