@@ -1,7 +1,6 @@
 package server
 
 import (
-	"bufio"
 	"errors"
 	"io"
 	"net"
@@ -34,8 +33,7 @@ func handleCommand(c *ConnectedClient, command string, args []string) (interface
 }
 
 func (s *Server) handleConnection(conn net.Conn) (*ConnectedClient, error) {
-	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
-	transport := transport.NewTransport(rw)
+	transport := transport.NewTransport(conn)
 	client := &ConnectedClient{transport, true}
 	s.clients = append(s.clients, client)
 	return client, transport.Start(func(req *common.Request) (interface{}, error) {

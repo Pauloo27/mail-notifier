@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"errors"
+	"net"
 	"sync"
 
 	"github.com/Pauloo27/logger"
@@ -12,13 +13,16 @@ import (
 )
 
 type Transport struct {
+	conn            net.Conn
 	rw              *bufio.ReadWriter
 	writeLock       *sync.Mutex
 	pendingRequests map[string]ResponseCallback
 }
 
-func NewTransport(rw *bufio.ReadWriter) *Transport {
+func NewTransport(conn net.Conn) *Transport {
+	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
 	return &Transport{
+		conn:            conn,
 		rw:              rw,
 		writeLock:       &sync.Mutex{},
 		pendingRequests: make(map[string]ResponseCallback),

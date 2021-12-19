@@ -1,7 +1,6 @@
 package client
 
 import (
-	"bufio"
 	"encoding/json"
 	"net"
 	"strconv"
@@ -29,8 +28,7 @@ func (c *Client) Connect() error {
 	if err != nil {
 		return err
 	}
-	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
-	t = transport.NewTransport(rw)
+	t = transport.NewTransport(conn)
 	go t.Start(nil)
 	return nil
 }
