@@ -14,19 +14,27 @@ import (
 
 type Transport struct {
 	conn            net.Conn
+	health          *Health
 	rw              *bufio.ReadWriter
 	writeLock       *sync.Mutex
 	pendingRequests map[string]ResponseCallback
 }
 
+func (t *Transport) Stop() error {
+	t.health.dead = true
+	return t.conn.Close()
+}
+
 func NewTransport(conn net.Conn) *Transport {
 	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
-	return &Transport{
+	t := &Transport{
 		conn:            conn,
 		rw:              rw,
 		writeLock:       &sync.Mutex{},
 		pendingRequests: make(map[string]ResponseCallback),
 	}
+	t.health = newHealth(func() { _ = t.Stop() })
+	return t
 }
 
 type RequestHandler func(req *common.Request) (data interface{}, err error)
