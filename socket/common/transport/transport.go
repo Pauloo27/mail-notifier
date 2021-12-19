@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net"
 	"sync"
+	"time"
 
 	"github.com/Pauloo27/logger"
 	"github.com/Pauloo27/mail-notifier/socket/common"
@@ -21,6 +22,7 @@ type Transport struct {
 }
 
 func (t *Transport) Stop() error {
+	logger.Debug("stopped")
 	t.health.dead = true
 	return t.conn.Close()
 }
@@ -35,6 +37,28 @@ func NewTransport(conn net.Conn) *Transport {
 	}
 	t.health = newHealth(func() { _ = t.Stop() })
 	return t
+}
+
+func (t *Transport) TransmitHeartbeats() {
+	heartbeat := "<3"
+	for !t.health.dead {
+		time.Sleep(heartbeatRate)
+		_, err := t.Send(heartbeatCommandName, []string{heartbeat}, func(res *common.Response) {
+			heartbeatRes, ok := res.Data.(string)
+			if !ok || heartbeatRes != heartbeat {
+				logger.Error("Invalid heartbeat response")
+				t.Stop()
+				return
+			}
+			t.health.HeartbeatReceived()
+		})
+		if err != nil {
+			logger.Error("Cannot send heartbeat: ", err)
+			t.Stop()
+			break
+		}
+		t.health.HeartbeatSent()
+	}
 }
 
 type RequestHandler func(req *common.Request) (data interface{}, err error)
@@ -110,6 +134,11 @@ func (t *Transport) doRead(handler RequestHandler) error {
 		var req common.Request
 		err = json.Unmarshal([]byte(data), &req)
 		if err == nil && isReq(req) {
+			if req.Command == heartbeatCommandName {
+				t.health.HeartbeatReceived()
+				go t.Respond(&req, req.Args[0], nil)
+				continue
+			}
 			go func() {
 				data, err := handler(&req)
 				t.Respond(&req, data, err)
@@ -130,6 +159,5 @@ func (t *Transport) doRead(handler RequestHandler) error {
 
 		}
 		logger.Warn("invalid data received")
-		t.writeFullPackage([]byte("?"))
 	}
 }

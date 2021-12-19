@@ -30,6 +30,7 @@ func (c *Client) Connect() error {
 	}
 	t = transport.NewTransport(conn)
 	go t.Start(nil)
+	go t.TransmitHeartbeats()
 	return nil
 }
 

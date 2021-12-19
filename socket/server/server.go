@@ -17,7 +17,6 @@ type Server struct {
 
 type ConnectedClient struct {
 	Transport *transport.Transport
-	Alive     bool
 }
 
 func NewServer() *Server {
@@ -34,7 +33,7 @@ func handleCommand(c *ConnectedClient, command string, args []string) (interface
 
 func (s *Server) handleConnection(conn net.Conn) (*ConnectedClient, error) {
 	transport := transport.NewTransport(conn)
-	client := &ConnectedClient{transport, true}
+	client := &ConnectedClient{transport}
 	s.clients = append(s.clients, client)
 	return client, transport.Start(func(req *common.Request) (interface{}, error) {
 		return handleCommand(client, req.Command, req.Args)
@@ -48,8 +47,7 @@ func (s *Server) acceptNewConnections(l net.Listener) error {
 			return err
 		}
 		go func() {
-			c, err := s.handleConnection(conn)
-			c.Alive = false
+			_, err := s.handleConnection(conn)
 			_ = conn.Close()
 			if err != nil && !errors.Is(err, io.EOF) {
 				logger.Error(err)

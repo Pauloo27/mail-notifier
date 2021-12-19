@@ -3,8 +3,10 @@ package transport
 import "time"
 
 const (
-	maxTimeWithoutReceiving = 40 * time.Second
-	heartbeatRate           = 30 * time.Second
+	maxTimeWithoutReceiving = 10 * time.Second
+	heartbeatRate           = 5 * time.Second
+
+	heartbeatCommandName = "heartbeat"
 )
 
 type Health struct {
