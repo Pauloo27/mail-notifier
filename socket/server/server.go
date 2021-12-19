@@ -13,6 +13,12 @@ import (
 )
 
 type Server struct {
+	clients []*ConnectedClient
+}
+
+type ConnectedClient struct {
+	Transport *transport.Transport
+	Alive     bool
 }
 
 func NewServer() *Server {
@@ -27,10 +33,12 @@ func handleCommand(command string, args []string) (interface{}, error) {
 	return handler(command, args)
 }
 
-func (s *Server) handleConnection(conn net.Conn) error {
+func (s *Server) handleConnection(conn net.Conn) (*ConnectedClient, error) {
 	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
 	transport := transport.NewTransport(rw)
-	return transport.Start(func(req *common.Request) (interface{}, error) {
+	client := &ConnectedClient{transport, true}
+	s.clients = append(s.clients, client)
+	return client, transport.Start(func(req *common.Request) (interface{}, error) {
 		return handleCommand(req.Command, req.Args)
 	})
 }
@@ -42,7 +50,9 @@ func (s *Server) acceptNewConnections(l net.Listener) error {
 			return err
 		}
 		go func() {
-			err := s.handleConnection(conn)
+			c, err := s.handleConnection(conn)
+			c.Alive = false
+			_ = conn.Close()
 			if err != nil && !errors.Is(err, io.EOF) {
 				logger.Error(err)
 			}
