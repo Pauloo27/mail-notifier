@@ -4,6 +4,6 @@
   "AskFilesToCommit": false,
   "PreCommit": null,
   "PostCommit": null,
-  "Modules": ["gui", "trans", "imap", "gmail", "core", "socket", "daemon"],
+  "Modules": ["gui", "cli", "trans", "imap", "gmail", "core", "socket", "daemon"],
   "AskCISkip": false
 }

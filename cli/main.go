@@ -11,7 +11,7 @@ import (
 
 func printStatus(unreadCount int) {
 	coolButton := polybar.ActionButton{
-		Index:   polybar.LEFT_CLICK,
+		Index:   polybar.LeftClick,
 		Display: " : " + strconv.Itoa(unreadCount),
 		Command: "/home/paulo/Dev/Go/src/mail-notifier/mail-notifier-gui",
 	}
