@@ -47,14 +47,14 @@ func (t *Transport) TransmitHeartbeats() {
 		_, err := t.Send(heartbeatCommandName, []string{heartbeat}, func(res *common.Response) {
 			heartbeatRes, ok := res.Data.(string)
 			if !ok || heartbeatRes != heartbeat {
-				logger.Error("Invalid heartbeat response")
+				logger.Error("invalid heartbeat response")
 				t.Stop()
 				return
 			}
 			t.health.HeartbeatReceived()
 		})
 		if err != nil {
-			logger.Error("Cannot send heartbeat: ", err)
+			logger.Error("cannot send heartbeat: ", err)
 			t.Stop()
 			break
 		}
@@ -159,6 +159,6 @@ func (t *Transport) doRead(handler RequestHandler) error {
 			continue
 
 		}
-		logger.Warn("invalid data received")
+		logger.Warn("invalid data received:", data)
 	}
 }

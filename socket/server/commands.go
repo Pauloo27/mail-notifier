@@ -21,6 +21,8 @@ var commandMap = map[string]handlerFunction{
 	command.MarkMessageAsRead.Name:      markMessageAsRead,
 	command.ClearInboxCache.Name:        clearInboxCache,
 	command.ClearAllInboxesCache.Name:   clearAllInboxesCache,
+	command.ListenToInbox.Name:          listenToInbox,
+	command.UnlistenToInbox.Name:        unlistenToInbox,
 }
 
 func echoCommand(c *ConnectedClient, command string, args []string) (interface{}, error) {
@@ -94,6 +96,30 @@ func clearInboxCache(c *ConnectedClient, command string, args []string) (interfa
 	}
 
 	return "ok", data.ClearInboxCache(inboxID)
+}
+
+func listenToInbox(c *ConnectedClient, command string, args []string) (interface{}, error) {
+	if len(args) != 1 {
+		return nil, fmt.Errorf("invalid argument size: %d", len(args))
+	}
+
+	inboxID, err := strconv.Atoi(args[0])
+	if err != nil {
+		return nil, fmt.Errorf("invalid inbox id: %w", err)
+	}
+	return "ok", data.ListenToInbox(inboxID, c.Transport.UID)
+}
+
+func unlistenToInbox(c *ConnectedClient, command string, args []string) (interface{}, error) {
+	if len(args) != 1 {
+		return nil, fmt.Errorf("invalid argument size: %d", len(args))
+	}
+
+	inboxID, err := strconv.Atoi(args[0])
+	if err != nil {
+		return nil, fmt.Errorf("invalid inbox id: %w", err)
+	}
+	return "ok", data.UnlistenToInbox(inboxID, c.Transport.UID)
 }
 
 func clearAllInboxesCache(c *ConnectedClient, command string, args []string) (interface{}, error) {

@@ -3,10 +3,14 @@ package main
 import (
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/Pauloo27/mail-notifier/cli/polybar"
 	"github.com/Pauloo27/mail-notifier/socket/client"
+	"github.com/Pauloo27/mail-notifier/socket/common/types"
+)
+
+var (
+	inboxes []*types.Inbox
 )
 
 func printStatus(unreadCount int) {
@@ -24,9 +28,13 @@ func handleError(err error) {
 	}
 }
 
-func mustFetchUnread(client *client.Client) (unread int) {
-	inboxes, err := client.ListInboxes()
+func mustListInboxes(client *client.Client) {
+	var err error
+	inboxes, err = client.ListInboxes()
 	handleError(err)
+}
+
+func mustFetchUnread(client *client.Client) (unread int) {
 	for _, inbox := range inboxes {
 		unreadMessages, err := client.FetchUnreadMessagesIn(inbox.ID)
 		handleError(err)
@@ -36,19 +44,22 @@ func mustFetchUnread(client *client.Client) (unread int) {
 }
 
 func mustListenToChanges(client *client.Client, ch chan int) {
-	go func() {
-		time.Sleep(10 * time.Second)
-		ch <- 0
-	}()
+	for _, inbox := range inboxes {
+		err := client.UnlistenToInbox(inbox.ID)
+		handleError(err)
+	}
 }
 
 func main() {
 	client := client.NewClient()
 	handleError(client.Connect())
+	mustListInboxes(client)
 	printStatus(mustFetchUnread(client))
 	ch := make(chan int)
 	mustListenToChanges(client, ch)
-	for {
-		printStatus(<-ch)
-	}
+	/*
+		for {
+			printStatus(<-ch)
+		}
+	*/
 }

@@ -68,6 +68,22 @@ func (c *Client) FetchUnreadMessagesIn(inboxID int) (*types.CachedUnreadMessages
 	return &unread, err
 }
 
+func (c *Client) ListenToInbox(inboxID int) error {
+	res, err := c.sendCommand(command.ListenToInbox.Name, []string{strconv.Itoa(inboxID)})
+	if err != nil {
+		return err
+	}
+	return res.Error
+}
+
+func (c *Client) UnlistenToInbox(inboxID int) error {
+	res, err := c.sendCommand(command.UnlistenToInbox.Name, []string{strconv.Itoa(inboxID)})
+	if err != nil {
+		return err
+	}
+	return res.Error
+}
+
 func (c *Client) MarkMessageAsRead(inboxID int, messageID string) error {
 	res, err := c.sendCommand(command.MarkMessageAsRead.Name, []string{strconv.Itoa(inboxID), messageID})
 	if err != nil {

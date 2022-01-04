@@ -19,6 +19,7 @@ var (
 	inboxMessages  = make(map[int]map[string]*types.CachedMailMessage)
 	unreadMessages = make(map[int]*types.CachedUnreadMessages)
 	cacheTimers    = make(map[int]*time.Timer)
+	inboxListeners = make(map[int][]string)
 
 	ErrConfigNotLoaded = errors.New("config not loaded")
 	ErrInvalidInbox    = errors.New("invalid inbox")
@@ -88,6 +89,32 @@ func GetMessage(inboxID int, messageID string) (*types.CachedMailMessage, error)
 		return GetMessage(inboxID, messageID)
 	}
 	return message, nil
+}
+
+func UnlistenToInbox(inboxID int, clientID string) error {
+	// TODO: mutex for the slice
+	listeners, ok := inboxListeners[inboxID]
+	if !ok {
+		return nil
+	}
+	var newListeners []string
+	for _, listener := range listeners {
+		if listener != clientID {
+			newListeners = append(newListeners, listener)
+		}
+	}
+	inboxListeners[inboxID] = newListeners
+	return nil
+}
+
+func ListenToInbox(inboxID int, clientID string) error {
+	_, ok := inboxListeners[inboxID]
+	if !ok {
+		inboxListeners[inboxID] = []string{clientID}
+		return nil
+	}
+	inboxListeners[inboxID] = append(inboxListeners[inboxID], clientID)
+	return nil
 }
 
 func ClearInboxCache(inboxID int) error {

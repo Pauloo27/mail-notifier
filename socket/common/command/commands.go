@@ -47,3 +47,15 @@ var ClearAllInboxesCache = &Command{
 	Usage:       "clear_all_inboxes_cache",
 	Description: "clear all unread messages cache",
 }
+
+var ListenToInbox = &Command{
+	Name:        "listen_to_inbox",
+	Usage:       "listen_to_inbox [inbox id]",
+	Description: "listen to updates on inbox",
+}
+
+var UnlistenToInbox = &Command{
+	Name:        "unlisten_to_inbox",
+	Usage:       "unlisten_to_inbox [inbox id]",
+	Description: "stop listening to updates on inbox",
+}
