@@ -9,6 +9,10 @@ const (
 	heartbeatCommandName = "heartbeat"
 )
 
+var (
+	timer *time.Timer
+)
+
 type Health struct {
 	lastTimeSent     time.Time
 	lastTimeReceived time.Time
@@ -19,7 +23,7 @@ type Health struct {
 
 func newHealth(unhealthCallback func()) *Health {
 	now := time.Now()
-	timer := time.NewTimer(maxTimeWithoutReceiving)
+	timer = time.NewTimer(maxTimeWithoutReceiving)
 	go func() {
 		<-timer.C
 		unhealthCallback()
@@ -31,6 +35,11 @@ func newHealth(unhealthCallback func()) *Health {
 		unhealthCallback: unhealthCallback,
 		dead:             false,
 	}
+}
+
+func (h *Health) Kill() {
+	h.dead = true
+	timer.Stop()
 }
 
 func (h *Health) HeartbeatSent() {

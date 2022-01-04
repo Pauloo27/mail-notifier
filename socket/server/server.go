@@ -35,6 +35,7 @@ func (s *Server) handleConnection(conn net.Conn) (*ConnectedClient, error) {
 	transport := transport.NewTransport(conn)
 	client := &ConnectedClient{transport}
 	s.clients = append(s.clients, client)
+	logger.Infof("new client connected: %s", transport.UID)
 	return client, transport.Start(func(req *common.Request) (interface{}, error) {
 		return handleCommand(client, req.Command, req.Args)
 	})
@@ -47,8 +48,9 @@ func (s *Server) acceptNewConnections(l net.Listener) error {
 			return err
 		}
 		go func() {
-			_, err := s.handleConnection(conn)
-			_ = conn.Close()
+			client, err := s.handleConnection(conn)
+			logger.Infof("client disconnected: %s", client.Transport.UID)
+			_ = client.Transport.Stop()
 			if err != nil && !errors.Is(err, io.EOF) {
 				logger.Error(err)
 			}

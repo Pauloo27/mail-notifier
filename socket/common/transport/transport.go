@@ -14,6 +14,7 @@ import (
 )
 
 type Transport struct {
+	UID             string
 	conn            net.Conn
 	health          *Health
 	rw              *bufio.ReadWriter
@@ -22,14 +23,14 @@ type Transport struct {
 }
 
 func (t *Transport) Stop() error {
-	logger.Debug("stopped")
-	t.health.dead = true
+	t.health.Kill()
 	return t.conn.Close()
 }
 
 func NewTransport(conn net.Conn) *Transport {
 	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
 	t := &Transport{
+		UID:             uuid.NewString(),
 		conn:            conn,
 		rw:              rw,
 		writeLock:       &sync.Mutex{},
