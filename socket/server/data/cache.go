@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	refreshCacheAfter = 1 * time.Minute
+	refreshCacheAfter = 5 * time.Minute
 )
 
 func calcCurrentInboxMD5(inboxID int) [16]byte {
