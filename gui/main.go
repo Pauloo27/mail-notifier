@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/Pauloo27/logger"
 	"github.com/Pauloo27/mail-notifier/gui/internal/containers/home"
 	"github.com/Pauloo27/mail-notifier/socket/client"
 
@@ -12,7 +13,7 @@ func main() {
 	c := client.NewClient()
 	err := c.Connect()
 	if err != nil {
-		panic(err)
+		logger.Fatal(err)
 	}
 	home.Show(c)
 }

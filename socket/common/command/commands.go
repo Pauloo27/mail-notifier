@@ -59,3 +59,10 @@ var UnlistenToInbox = &Command{
 	Usage:       "unlisten_to_inbox [inbox id]",
 	Description: "stop listening to updates on inbox",
 }
+
+var NotifyInboxChange = &Command{
+	Name:  "notify_inbox_change",
+	Usage: "[SERVER ONLY] notify_inbox_change [inbox id]",
+	Description: "received from the server when an inbox you're listening to" +
+		"changed. The new messages come on the request data",
+}

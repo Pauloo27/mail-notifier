@@ -4,6 +4,13 @@ import (
 	"crypto/md5"
 	"sort"
 	"strings"
+	"time"
+
+	"github.com/Pauloo27/logger"
+)
+
+const (
+	refreshCacheAfter = 1 * time.Minute
 )
 
 func calcCurrentInboxMD5(inboxID int) [16]byte {
@@ -16,18 +23,35 @@ func calcCurrentInboxMD5(inboxID int) [16]byte {
 	return md5.Sum(x)
 }
 
+func notifyListeners(inboxID int) {
+	if NotifyInboxChanges == nil {
+		return
+	}
+	listeners, found := inboxListeners[inboxID]
+	if !found {
+		return
+	}
+	messages, found := unreadMessages[inboxID]
+	if !found {
+		return
+	}
+	for _, clientID := range listeners {
+		NotifyInboxChanges(clientID, inboxID, messages)
+	}
+}
+
 func refreshCache(inboxID int) {
 	prevSum := calcCurrentInboxMD5(inboxID)
 	for {
-		curSum := calcCurrentInboxMD5(inboxID)
 		<-cacheTimers[inboxID].C
 		ClearInboxCache(inboxID)
 		err := fetchUnreadMessage(inboxID)
+		curSum := calcCurrentInboxMD5(inboxID)
 		if err != nil {
-			panic(err)
+			logger.Fatal(err)
 		}
 		if curSum != prevSum {
-			// TODO: notify listeners
+			notifyListeners(inboxID)
 		}
 		prevSum = curSum
 	}

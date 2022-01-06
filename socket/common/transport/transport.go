@@ -44,7 +44,7 @@ func (t *Transport) TransmitHeartbeats() {
 	heartbeat := "<3"
 	for !t.health.dead {
 		time.Sleep(heartbeatRate)
-		_, err := t.Send(heartbeatCommandName, []string{heartbeat}, func(res *common.Response) {
+		_, err := t.Send(heartbeatCommandName, []string{heartbeat}, nil, func(res *common.Response) {
 			heartbeatRes, ok := res.Data.(string)
 			if !ok || heartbeatRes != heartbeat {
 				logger.Error("invalid heartbeat response")
@@ -66,6 +66,9 @@ type RequestHandler func(req *common.Request) (data interface{}, err error)
 type ResponseCallback func(res *common.Response)
 
 func (t *Transport) Start(handler RequestHandler) error {
+	if handler == nil {
+		return nil
+	}
 	return t.doRead(handler)
 }
 
@@ -86,11 +89,12 @@ func (t *Transport) writeFullPackage(data []byte) error {
 	return t.rw.Flush()
 }
 
-func (t *Transport) Send(command string, args []string, cb ResponseCallback) (string, error) {
+func (t *Transport) Send(command string, args []string, data interface{}, cb ResponseCallback) (string, error) {
 	id := uuid.New().String()
 	req := &common.Request{
 		ID:      id,
 		Command: command,
+		Data:    data,
 		Args:    args,
 	}
 	reqJSON, err := json.Marshal(req)
@@ -151,7 +155,7 @@ func (t *Transport) doRead(handler RequestHandler) error {
 		if err == nil && isRes(res) {
 			go func() {
 				cb, found := t.pendingRequests[res.To]
-				if !found {
+				if !found || cb == nil {
 					return
 				}
 				cb(&res)

@@ -9,17 +9,14 @@ import (
 	"github.com/Pauloo27/mail-notifier/socket/common/types"
 )
 
-const (
-	refreshCacheAfter = 1 * time.Minute
-)
-
 var (
-	config         *storage.Config
-	inboxes        []provider.MailBox
-	inboxMessages  = make(map[int]map[string]*types.CachedMailMessage)
-	unreadMessages = make(map[int]*types.CachedUnreadMessages)
-	cacheTimers    = make(map[int]*time.Timer)
-	inboxListeners = make(map[int][]string)
+	config             *storage.Config
+	inboxes            []provider.MailBox
+	inboxMessages      = make(map[int]map[string]*types.CachedMailMessage)
+	unreadMessages     = make(map[int]*types.CachedUnreadMessages)
+	cacheTimers        = make(map[int]*time.Timer)
+	inboxListeners     = make(map[int][]string)
+	NotifyInboxChanges func(clientID string, inboxID int, messages *types.CachedUnreadMessages)
 
 	ErrConfigNotLoaded = errors.New("config not loaded")
 	ErrInvalidInbox    = errors.New("invalid inbox")

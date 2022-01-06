@@ -2,6 +2,8 @@ package client
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net"
 	"strconv"
 
@@ -16,10 +18,43 @@ var (
 	t    *transport.Transport
 )
 
-type Client struct{}
+type Client struct {
+	OnInboxChanged func(inboxID int, messages *types.CachedUnreadMessages)
+}
 
 func NewClient() *Client {
 	return &Client{}
+}
+
+func (c *Client) handler(req *common.Request) (interface{}, error) {
+	if req.Command == command.NotifyInboxChange.Name {
+		if len(req.Args) != 1 {
+			return nil, fmt.Errorf("invalid argument size: %d", len(req.Args))
+		}
+
+		inboxID, err := strconv.Atoi(req.Args[0])
+		if err != nil {
+			return nil, fmt.Errorf("invalid inbox id: %w", err)
+		}
+
+		if c.OnInboxChanged == nil {
+			return "ignored, but ok", nil
+		}
+
+		var unread types.CachedUnreadMessages
+		rawData, err := json.Marshal(req.Data)
+		if err != nil {
+			return nil, err
+		}
+		err = json.Unmarshal(rawData, &unread)
+		if err != nil {
+			return nil, err
+		}
+
+		c.OnInboxChanged(inboxID, &unread)
+		return "ok", nil
+	}
+	return nil, errors.New("command not handled")
 }
 
 func (c *Client) Connect() error {
@@ -29,7 +64,7 @@ func (c *Client) Connect() error {
 		return err
 	}
 	t = transport.NewTransport(conn)
-	go t.Start(nil)
+	go t.Start(c.handler)
 	go t.TransmitHeartbeats()
 	return nil
 }
@@ -97,7 +132,7 @@ func (c *Client) sendCommand(command string, args []string) (*common.Response, e
 	cb := func(res *common.Response) {
 		resCh <- res
 	}
-	t.Send(command, args, cb)
+	t.Send(command, args, nil, cb)
 	res := <-resCh
 	return res, nil
 }

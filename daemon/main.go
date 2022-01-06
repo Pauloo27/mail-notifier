@@ -1,8 +1,7 @@
 package main
 
 import (
-	"fmt"
-
+	"github.com/Pauloo27/logger"
 	"github.com/Pauloo27/mail-notifier/socket/server"
 	"github.com/Pauloo27/mail-notifier/socket/server/data"
 
@@ -11,15 +10,18 @@ import (
 )
 
 func main() {
+	logger.Info("loading config...")
 	if err := data.LoadConfig(); err != nil {
-		panic(err)
+		logger.Fatal(err)
 	}
+	logger.Success("config loaded!")
+	logger.Info("connecting to inboxes...")
 	if err := data.ConnectToInboxes(); err != nil {
-		panic(err)
+		logger.Fatal(err)
 	}
+	logger.Success("connected to all inboxes!")
 	sv := server.NewServer()
-	fmt.Println("Config loaded!")
 	if err := sv.Listen(); err != nil {
-		panic(err)
+		logger.Fatal(err)
 	}
 }

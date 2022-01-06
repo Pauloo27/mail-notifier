@@ -4,6 +4,7 @@ import (
 	"os/exec"
 	"strconv"
 
+	"github.com/Pauloo27/logger"
 	"github.com/Pauloo27/mail-notifier/gui/internal/containers/inbox"
 	"github.com/Pauloo27/mail-notifier/gui/utils"
 	"github.com/Pauloo27/mail-notifier/socket/client"
@@ -80,14 +81,14 @@ func createInboxList(c *client.Client) *gtk.ScrolledWindow {
 
 		inboxes, err := c.ListInboxes()
 		if err != nil {
-			panic(err)
+			logger.Fatal(err)
 		}
 
 		for i := range inboxes {
 			msgs, err := c.FetchUnreadMessagesIn(i)
 			messages = append(messages, msgs)
 			if err != nil {
-				panic(err)
+				logger.Fatal(err)
 			}
 		}
 

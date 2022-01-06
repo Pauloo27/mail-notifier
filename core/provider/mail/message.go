@@ -3,6 +3,7 @@ package mail
 import (
 	"time"
 
+	"github.com/Pauloo27/logger"
 	"github.com/Pauloo27/mail-notifier/core/provider"
 )
 
@@ -41,7 +42,7 @@ func (m MailMessage) GetID() string {
 func (m MailMessage) GetSubject() string {
 	if !m.data.loaded {
 		if err := m.load(); err != nil {
-			panic(err)
+			logger.Fatal(err)
 		}
 	}
 	return m.data.subject
@@ -50,7 +51,7 @@ func (m MailMessage) GetSubject() string {
 func (m MailMessage) GetFrom() string {
 	if !m.data.loaded {
 		if err := m.load(); err != nil {
-			panic(err)
+			logger.Fatal(err)
 		}
 	}
 	return m.data.from
@@ -59,7 +60,7 @@ func (m MailMessage) GetFrom() string {
 func (m MailMessage) GetTo() []string {
 	if !m.data.loaded {
 		if err := m.load(); err != nil {
-			panic(err)
+			logger.Fatal(err)
 		}
 	}
 	return m.data.to
@@ -68,7 +69,7 @@ func (m MailMessage) GetTo() []string {
 func (m MailMessage) GetDate() time.Time {
 	if !m.data.loaded {
 		if err := m.load(); err != nil {
-			panic(err)
+			logger.Fatal(err)
 		}
 	}
 	return m.data.date

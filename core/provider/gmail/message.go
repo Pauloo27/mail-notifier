@@ -3,6 +3,7 @@ package gmail
 import (
 	"time"
 
+	"github.com/Pauloo27/logger"
 	"github.com/Pauloo27/mail-notifier/core/provider"
 )
 
@@ -41,7 +42,7 @@ func (m *GmailMessage) load() error {
 func (m GmailMessage) GetSubject() string {
 	if !m.data.loaded {
 		if err := m.load(); err != nil {
-			panic(err)
+			logger.Fatal(err)
 		}
 	}
 	return m.data.subject
@@ -50,7 +51,7 @@ func (m GmailMessage) GetSubject() string {
 func (m GmailMessage) GetFrom() string {
 	if !m.data.loaded {
 		if err := m.load(); err != nil {
-			panic(err)
+			logger.Fatal(err)
 		}
 	}
 	return m.data.from
@@ -59,7 +60,7 @@ func (m GmailMessage) GetFrom() string {
 func (m GmailMessage) GetTo() []string {
 	if !m.data.loaded {
 		if err := m.load(); err != nil {
-			panic(err)
+			logger.Fatal(err)
 		}
 	}
 	return m.data.to
@@ -68,7 +69,7 @@ func (m GmailMessage) GetTo() []string {
 func (m GmailMessage) GetDate() time.Time {
 	if !m.data.loaded {
 		if err := m.load(); err != nil {
-			panic(err)
+			logger.Fatal(err)
 		}
 	}
 	return m.data.date

@@ -3,6 +3,7 @@ package inbox
 import (
 	"os/exec"
 
+	"github.com/Pauloo27/logger"
 	"github.com/Pauloo27/mail-notifier/gui/utils"
 	"github.com/Pauloo27/mail-notifier/socket/client"
 	"github.com/Pauloo27/mail-notifier/socket/common/types"
@@ -76,7 +77,7 @@ func createMessageItem(c *client.Client, box *types.Inbox, message *types.Cached
 		go func() {
 			err := c.MarkMessageAsRead(box.ID, message.ID)
 			if err != nil {
-				panic(err)
+				logger.Fatal(err)
 			}
 		}()
 	})

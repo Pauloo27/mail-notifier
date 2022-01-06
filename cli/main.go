@@ -4,27 +4,29 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/Pauloo27/logger"
 	"github.com/Pauloo27/mail-notifier/cli/polybar"
 	"github.com/Pauloo27/mail-notifier/socket/client"
 	"github.com/Pauloo27/mail-notifier/socket/common/types"
 )
 
 var (
-	inboxes []*types.Inbox
+	inboxes       []*types.Inbox
+	unreadByInbox = make(map[int]int)
 )
 
 func printStatus(unreadCount int) {
 	coolButton := polybar.ActionButton{
 		Index:   polybar.LeftClick,
 		Display: " : " + strconv.Itoa(unreadCount),
-		Command: "/home/paulo/Dev/Go/src/mail-notifier/mail-notifier-gui",
+		Command: "mail-notifier-gui",
 	}
 	fmt.Println(coolButton.String())
 }
 
 func handleError(err error) {
 	if err != nil {
-		panic(err)
+		logger.Fatal(err)
 	}
 }
 
@@ -35,17 +37,26 @@ func mustListInboxes(client *client.Client) {
 }
 
 func mustFetchUnread(client *client.Client) (unread int) {
-	for _, inbox := range inboxes {
+	for i, inbox := range inboxes {
 		unreadMessages, err := client.FetchUnreadMessagesIn(inbox.ID)
 		handleError(err)
+		unreadByInbox[i] = len(unreadMessages.Messages)
 		unread += len(unreadMessages.Messages)
 	}
 	return
 }
 
-func mustListenToChanges(client *client.Client, ch chan int) {
+func mustListenToChanges(c *client.Client, ch chan int) {
+	c.OnInboxChanged = func(inboxID int, messages *types.CachedUnreadMessages) {
+		unreadByInbox[inboxID] = len(messages.Messages)
+		sum := 0
+		for _, unread := range unreadByInbox {
+			sum += unread
+		}
+		ch <- sum
+	}
 	for _, inbox := range inboxes {
-		err := client.UnlistenToInbox(inbox.ID)
+		err := c.ListenToInbox(inbox.ID)
 		handleError(err)
 	}
 }
@@ -57,9 +68,7 @@ func main() {
 	printStatus(mustFetchUnread(client))
 	ch := make(chan int)
 	mustListenToChanges(client, ch)
-	/*
-		for {
-			printStatus(<-ch)
-		}
-	*/
+	for {
+		printStatus(<-ch)
+	}
 }
