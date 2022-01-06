@@ -12,6 +12,8 @@ func Show(c *client.Client) {
 	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
 	utils.HandleError(err)
 
+	win.SetPosition(gtk.WIN_POS_MOUSE)
+
 	win.Connect("destroy", func() {
 		gtk.MainQuit()
 	})
