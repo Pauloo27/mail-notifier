@@ -69,7 +69,12 @@ func (m Gmail) FetchMessage(id string) (message provider.MailMessage, err error)
 		case "Subject":
 			subject = m.Value
 		case "From":
-			from = mailAddressRegex.FindAllStringSubmatch(m.Value, 1)[0][2]
+			matches := mailAddressRegex.FindAllStringSubmatch(m.Value, 1)
+			if len(matches) != 0 {
+				from = matches[0][2]
+			} else {
+				from = m.Value
+			}
 		case "To":
 			matches := mailAddressRegex.FindAllStringSubmatch(m.Value, -1)
 			for _, match := range matches {
