@@ -16,10 +16,15 @@ var (
 )
 
 func printStatus(unreadCount int) {
+	color := "#50fa7b"
+	if unreadCount != 0 {
+		color = "#ffb86c"
+	}
 	coolButton := polybar.ActionButton{
-		Index:   polybar.LeftClick,
-		Display: " : " + strconv.Itoa(unreadCount),
-		Command: "mail-notifier-gui",
+		Index:          polybar.LeftClick,
+		Display:        " : " + strconv.Itoa(unreadCount) + " unread",
+		UnderlineColor: color,
+		Command:        "mail-notifier-gui",
 	}
 	fmt.Println(coolButton.String())
 }

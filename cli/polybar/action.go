@@ -18,14 +18,20 @@ const (
 )
 
 type ActionButton struct {
-	Index            MouseIndex
-	Display, Command string
+	Index                            MouseIndex
+	Display, Command, UnderlineColor string
 }
 
 func (a ActionButton) String() string {
-	return fmt.Sprintf("%%{A%d:%s:}%s%%{A}", a.Index, a.Command, a.Display)
+	button := fmt.Sprintf("%%{A%d:%s:}%s%%{A}", a.Index, a.Command, a.Display)
+	if a.UnderlineColor == "" {
+		return button
+	}
+	return fmt.Sprintf("%%{u%s}%%{+u}%s%%{-u}", a.UnderlineColor, button)
 }
 
 func ActionOver(a ActionButton, index MouseIndex, command string) ActionButton {
-	return ActionButton{index, a.String(), command}
+	return ActionButton{
+		Index: index, Display: a.String(), Command: command,
+	}
 }
