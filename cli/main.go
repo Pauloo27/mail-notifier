@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 
-	"github.com/Pauloo27/logger"
 	"github.com/Pauloo27/mail-notifier/cli/polybar"
 	"github.com/Pauloo27/mail-notifier/socket/client"
 	"github.com/Pauloo27/mail-notifier/socket/common/types"
@@ -30,9 +30,16 @@ func printStatus(unreadCount int) {
 }
 
 func handleError(err error) {
-	if err != nil {
-		logger.Fatal(err)
+	if err == nil {
+		return
 	}
+	errBtn := polybar.ActionButton{
+		Index:          polybar.LeftClick,
+		Display:        "error",
+		UnderlineColor: "#ff5555",
+	}
+	fmt.Println(errBtn)
+	os.Exit(-1)
 }
 
 func mustListInboxes(client *client.Client) {
