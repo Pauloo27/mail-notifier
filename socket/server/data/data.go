@@ -129,7 +129,29 @@ func MarkMessageAsRead(inboxID int, messageID string) error {
 		return ErrInvalidInbox
 	}
 	inbox := inboxes[inboxID]
-	return inbox.MarkMessageAsRead(messageID)
+	err := inbox.MarkMessageAsRead(messageID)
+	if err != nil {
+		return err
+	}
+	unreadMsgs := unreadMessages[inboxID].Messages
+
+	var newUnreadMsgs []*types.CachedMailMessage
+
+	for _, msg := range unreadMsgs {
+		if msg.ID == messageID {
+			continue
+		}
+		newUnreadMsgs = append(newUnreadMsgs, msg)
+	}
+
+	unreadMessages[inboxID] = &types.CachedUnreadMessages{
+		Messages: newUnreadMsgs,
+		FechedAt: time.Now(),
+	}
+
+	notifyListeners(inboxID)
+
+	return nil
 }
 
 func fetchUnreadMessage(inboxID int) error {
