@@ -21,7 +21,7 @@ func Show(c *client.Client) {
 	mainContainer, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 1)
 	utils.HandleError(err)
 
-	mainContainer.PackStart(createHeader(), false, false, 5)
+	mainContainer.PackStart(createHeader(c), false, false, 5)
 	mainContainer.PackStart(createInboxList(c), true, true, 5)
 
 	win.Add(mainContainer)

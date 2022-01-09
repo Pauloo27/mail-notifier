@@ -20,6 +20,7 @@ var (
 
 type Client struct {
 	OnInboxChanged func(inboxID int, messages *types.CachedUnreadMessages)
+	LastInboxList  []*types.Inbox
 }
 
 func NewClient() *Client {
@@ -83,6 +84,9 @@ func (c *Client) ListInboxes() ([]*types.Inbox, error) {
 		return nil, err
 	}
 	err = json.Unmarshal(rawData, &inboxes)
+	if err == nil {
+		c.LastInboxList = inboxes
+	}
 	return inboxes, err
 }
 
@@ -101,6 +105,14 @@ func (c *Client) FetchUnreadMessagesIn(inboxID int) (*types.CachedUnreadMessages
 	}
 	err = json.Unmarshal(rawData, &unread)
 	return &unread, err
+}
+
+func (c *Client) ClearAllInboxCache() error {
+	res, err := c.sendCommand(command.ClearAllInboxesCache.Name, nil)
+	if err != nil {
+		return err
+	}
+	return res.Error
 }
 
 func (c *Client) ListenToInbox(inboxID int) error {

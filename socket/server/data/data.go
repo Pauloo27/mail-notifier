@@ -213,6 +213,7 @@ func GetUnreadMessagesIn(inboxID int) (*types.CachedUnreadMessages, error) {
 		if err != nil {
 			return nil, err
 		}
+		go notifyListeners(inboxID)
 		return GetUnreadMessagesIn(inboxID)
 	}
 	return unreadMessages, nil
