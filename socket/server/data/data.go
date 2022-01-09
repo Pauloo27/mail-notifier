@@ -2,6 +2,7 @@ package data
 
 import (
 	"errors"
+	"sync"
 	"time"
 
 	"github.com/Pauloo27/mail-notifier/core/provider"
@@ -16,6 +17,8 @@ var (
 	unreadMessages     = make(map[int]*types.CachedUnreadMessages)
 	cacheTimers        = make(map[int]*time.Timer)
 	inboxListeners     = make(map[int][]string)
+	inboxListenersLock = &sync.Mutex{}
+
 	NotifyInboxChanges func(clientID string, inboxID int, messages *types.CachedUnreadMessages)
 
 	ErrConfigNotLoaded = errors.New("config not loaded")
@@ -89,7 +92,9 @@ func GetMessage(inboxID int, messageID string) (*types.CachedMailMessage, error)
 }
 
 func UnlistenToInbox(inboxID int, clientID string) error {
-	// TODO: mutex for the slice
+	inboxListenersLock.Lock()
+	defer inboxListenersLock.Unlock()
+
 	listeners, ok := inboxListeners[inboxID]
 	if !ok {
 		return nil
@@ -105,6 +110,9 @@ func UnlistenToInbox(inboxID int, clientID string) error {
 }
 
 func ListenToInbox(inboxID int, clientID string) error {
+	inboxListenersLock.Lock()
+	defer inboxListenersLock.Unlock()
+
 	_, ok := inboxListeners[inboxID]
 	if !ok {
 		inboxListeners[inboxID] = []string{clientID}
