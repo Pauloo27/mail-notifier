@@ -63,8 +63,15 @@ func (s *Server) acceptNewConnections(l net.Listener) error {
 		}
 		go func() {
 			client, err := s.handleConnection(conn)
-			logger.Infof("client disconnected: %s", client.Transport.UID)
+					logger.Infof("client disconnected: %s", client.Transport.UID)
 			delete(s.clients, client.Transport.UID)
+
+			// unlisten to all inboxes...
+			inboxes, _ := data.GetInboxes()
+			for i := range inboxes {
+				data.UnlistenToInbox(i, client.Transport.UID)
+			}
+
 			_ = client.Transport.Stop()
 			if err != nil && !errors.Is(err, io.EOF) {
 				logger.Error(err)
