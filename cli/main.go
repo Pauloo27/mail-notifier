@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
+	"github.com/Pauloo27/logger"
 	"github.com/Pauloo27/mail-notifier/cli/polybar"
 	"github.com/Pauloo27/mail-notifier/socket/client"
 	"github.com/Pauloo27/mail-notifier/socket/common/types"
@@ -39,7 +41,7 @@ func handleError(err error) {
 		UnderlineColor: "#ff5555",
 	}
 	fmt.Println(errBtn)
-	os.Exit(-1)
+	logger.Fatal(err)
 }
 
 func mustListInboxes(client *client.Client) {
@@ -71,6 +73,16 @@ func mustListenToChanges(c *client.Client, ch chan int) {
 		err := c.ListenToInbox(inbox.ID)
 		handleError(err)
 	}
+}
+
+func init() {
+	fileName := fmt.Sprintf("/tmp/mail-notifier/log-%d.txt", time.Now().Unix())
+	logFile, err := os.Create(fileName)
+	if err != nil {
+		panic(err)
+	}
+	logger.Stdout = logFile
+	logger.Stderr = logFile
 }
 
 func main() {

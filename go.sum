@@ -36,6 +36,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/Pauloo27/logger v0.0.0-20211021033456-da9262f8be0f h1:aMmlzeEZForBN4R5qrtCyGpYqnfAIUscWlDy3nc1aAY=
 github.com/Pauloo27/logger v0.0.0-20211021033456-da9262f8be0f/go.mod h1:pr6tiuqHGzDinqApqqLO7CjzoUXkTM/yq1Pj78Z089Q=
+github.com/Pauloo27/logger v0.0.0-20220110210059-8797a77f82ac h1:VzCGiBX5t5APnxHrWefQqnCdsByk4J7wG1Cd10RnTLM=
+github.com/Pauloo27/logger v0.0.0-20220110210059-8797a77f82ac/go.mod h1:pr6tiuqHGzDinqApqqLO7CjzoUXkTM/yq1Pj78Z089Q=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=
