@@ -1,9 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
+	"syscall"
 	"time"
 
 	"github.com/Pauloo27/logger"
@@ -87,7 +89,22 @@ func init() {
 
 func main() {
 	client := client.NewClient()
-	handleError(client.Connect())
+	retries := 0
+	for {
+		err := client.Connect()
+		if err == nil {
+			break
+		}
+		logger.Error(err)
+		logger.Infof("waiting 5 seconds before retrying (%d)", retries)
+		if errors.Is(err, syscall.ECONNREFUSED) && retries < 10 {
+			retries++
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		logger.Fatal(err)
+	}
+
 	mustListInboxes(client)
 	printStatus(mustFetchUnread(client))
 	ch := make(chan int)
