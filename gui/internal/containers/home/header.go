@@ -10,6 +10,11 @@ func createHeader(c *client.Client) *gtk.HeaderBar {
 	container, err := gtk.HeaderBarNew()
 	utils.HandleError(err)
 
+	sc, err := container.GetStyleContext()
+	utils.HandleError(err)
+
+	sc.AddClass("titlebar")
+
 	titleLbl, err := gtk.LabelNew("Your inboxes:")
 	utils.HandleError(err)
 
