@@ -78,6 +78,11 @@ func mustListenToChanges(c *client.Client, ch chan int) {
 }
 
 func init() {
+	tmpFolder := "/tmp/mail-notifier"
+	if _, err := os.Stat(tmpFolder); errors.Is(err, os.ErrNotExist) {
+		os.MkdirAll(tmpFolder, 0744)
+	}
+
 	fileName := fmt.Sprintf("/tmp/mail-notifier/log-%d.txt", time.Now().Unix())
 	logFile, err := os.Create(fileName)
 	if err != nil {
