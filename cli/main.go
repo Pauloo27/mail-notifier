@@ -19,6 +19,15 @@ var (
 	unreadByInbox = make(map[int]int)
 )
 
+func printPending() {
+	btn := polybar.ActionButton{
+		Index:          polybar.LeftClick,
+		Display:        "Connecting...",
+		UnderlineColor: "#ffb86c",
+	}
+	fmt.Println(btn.String())
+}
+
 func printStatus(unreadCount int) {
 	color := "#50fa7b"
 	if unreadCount != 0 {
@@ -39,7 +48,7 @@ func handleError(err error) {
 	}
 	errBtn := polybar.ActionButton{
 		Index:          polybar.LeftClick,
-		Display:        "error",
+		Display:        "Error =(",
 		UnderlineColor: "#ff5555",
 	}
 	fmt.Println(errBtn)
@@ -93,6 +102,7 @@ func init() {
 }
 
 func main() {
+	printPending()
 	client := client.NewClient()
 	retries := 0
 	for {
@@ -107,7 +117,7 @@ func main() {
 			time.Sleep(5 * time.Second)
 			continue
 		}
-		logger.Fatal(err)
+		handleError(err)
 	}
 
 	mustListInboxes(client)
