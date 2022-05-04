@@ -110,6 +110,7 @@ func (t *Transport) Send(command string, args []string, data interface{}, cb Res
 			To:    id,
 			Data:  nil,
 		})
+		delete(t.pendingRequests, id)
 		return "", err
 	}
 	return id, nil
@@ -164,6 +165,7 @@ func (t *Transport) doRead(handler RequestHandler) error {
 				if !found || cb == nil {
 					return
 				}
+				delete(t.pendingRequests, res.To)
 				cb(&res)
 			}()
 			continue
