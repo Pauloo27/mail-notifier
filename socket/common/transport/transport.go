@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net"
 	"sync"
 	"time"
@@ -101,11 +102,16 @@ func (t *Transport) Send(command string, args []string, data interface{}, cb Res
 	if err != nil {
 		return "", err
 	}
+	t.pendingRequests[id] = cb
 	err = t.writeFullPackage(reqJSON)
 	if err != nil {
+		cb(&common.Response{
+			Error: fmt.Errorf("failed to send: %v", err),
+			To:    id,
+			Data:  nil,
+		})
 		return "", err
 	}
-	t.pendingRequests[id] = cb
 	return id, nil
 }
 
