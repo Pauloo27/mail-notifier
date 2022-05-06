@@ -3,13 +3,17 @@ package mail
 import (
 	"errors"
 	"fmt"
+	"io"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/Pauloo27/logger"
 	"github.com/Pauloo27/mail-notifier/core/provider"
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
+	gomsg "github.com/emersion/go-message"
 	"github.com/emersion/go-message/mail"
 )
 
@@ -120,16 +124,16 @@ func (m Mail) FetchMessage(id string) (message provider.MailMessage, err error) 
 
 	body := msg.GetBody(&section)
 
-	var mr *mail.Reader
-	mr, err = mail.CreateReader(body)
+	e, err := gomsg.Read(body)
 	if err != nil {
 		return
 	}
 
+	mr := mail.NewReader(e)
+
 	var date time.Time
 	var subject, from string
 	var to []string
-
 	var addrs []*mail.Address
 
 	header := mr.Header
