@@ -13,6 +13,7 @@ type gmailMessageData struct {
 	loaded        bool
 	date          time.Time
 	from, subject string
+	textContents  map[string][]byte
 	to            []string
 }
 
@@ -37,6 +38,15 @@ func (m *GmailMessage) load() error {
 	}
 	*m.data = *fullMsg.(GmailMessage).data
 	return nil
+}
+
+func (m GmailMessage) GetTextContents() map[string][]byte {
+	if !m.data.loaded {
+		if err := m.load(); err != nil {
+			logger.Fatal(err)
+		}
+	}
+	return m.data.textContents
 }
 
 func (m GmailMessage) GetSubject() string {

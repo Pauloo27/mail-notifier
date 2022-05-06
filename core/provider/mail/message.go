@@ -13,6 +13,7 @@ type mailMessageData struct {
 	loaded        bool
 	date          time.Time
 	from, subject string
+	textContents  map[string][]byte
 	to            []string
 }
 
@@ -46,6 +47,15 @@ func (m MailMessage) GetSubject() string {
 		}
 	}
 	return m.data.subject
+}
+
+func (m MailMessage) GetTextContents() map[string][]byte {
+	if !m.data.loaded {
+		if err := m.load(); err != nil {
+			logger.Fatal(err)
+		}
+	}
+	return m.data.textContents
 }
 
 func (m MailMessage) GetFrom() string {
