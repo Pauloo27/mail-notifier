@@ -52,10 +52,12 @@ func createMessageItem(c *client.Client, box *types.Inbox, message *types.Cached
 	subjectLbl, err := gtk.LabelNew(utils.AddEllipsis(message.Subject, 40))
 	utils.HandleError(err)
 	subjectLbl.SetHAlign(gtk.ALIGN_START)
+	subjectLbl.SetTooltipText(message.Subject)
 
 	fromLbl, err := gtk.LabelNew(utils.AddEllipsis(message.From, 30))
 	utils.HandleError(err)
 	fromLbl.SetHAlign(gtk.ALIGN_START)
+	fromLbl.SetTooltipText(message.From)
 
 	leftContainer.PackStart(subjectLbl, false, false, 1)
 	leftContainer.PackStart(fromLbl, false, false, 1)
