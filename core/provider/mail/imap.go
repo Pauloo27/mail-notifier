@@ -3,13 +3,10 @@ package mail
 import (
 	"errors"
 	"fmt"
-	"io"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
-	"github.com/Pauloo27/logger"
 	"github.com/Pauloo27/mail-notifier/core/provider"
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
