@@ -2,8 +2,10 @@ package inbox
 
 import (
 	"os/exec"
+	"strings"
 
 	"github.com/Pauloo27/logger"
+	"github.com/Pauloo27/mail-notifier/gui/internal/containers/message"
 	"github.com/Pauloo27/mail-notifier/gui/utils"
 	"github.com/Pauloo27/mail-notifier/socket/client"
 	"github.com/Pauloo27/mail-notifier/socket/common/types"
@@ -42,25 +44,44 @@ func asyncLoad(container *gtk.Grid, c *client.Client, box *types.Inbox, messages
 
 }
 
-func createMessageItem(c *client.Client, box *types.Inbox, message *types.CachedMailMessage) *gtk.Box {
+func createMessageItem(c *client.Client, box *types.Inbox, msg *types.CachedMailMessage) *gtk.Box {
 	container, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 5)
 	utils.HandleError(err)
 
 	leftContainer, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 5)
 	utils.HandleError(err)
 
-	subjectLbl, err := gtk.LabelNew(utils.AddEllipsis(message.Subject, 40))
+	subjectLbl, err := gtk.LabelNew(utils.AddEllipsis(msg.Subject, 40))
 	utils.HandleError(err)
 	subjectLbl.SetHAlign(gtk.ALIGN_START)
-	subjectLbl.SetTooltipText(message.Subject)
+	subjectLbl.SetTooltipText(msg.Subject)
 
-	fromLbl, err := gtk.LabelNew(utils.AddEllipsis(message.From, 30))
+	fromLbl, err := gtk.LabelNew(utils.AddEllipsis(msg.From, 30))
 	utils.HandleError(err)
 	fromLbl.SetHAlign(gtk.ALIGN_START)
-	fromLbl.SetTooltipText(message.From)
+	fromLbl.SetTooltipText(msg.From)
 
 	leftContainer.PackStart(subjectLbl, false, false, 1)
 	leftContainer.PackStart(fromLbl, false, false, 1)
+
+	var textContentType string
+	for contentType := range msg.TextContents {
+		if strings.HasPrefix(contentType, "text/plain") {
+			textContentType = contentType
+			break
+		}
+	}
+
+	previewMailBtn, err := gtk.ButtonNewFromIconName("go-next", gtk.ICON_SIZE_BUTTON)
+	utils.HandleError(err)
+	previewMailBtn.SetVAlign(gtk.ALIGN_CENTER)
+	previewMailBtn.SetTooltipText("Preview mail content")
+	previewMailBtn.SetSensitive(textContentType != "")
+	previewMailBtn.Connect("clicked", func() {
+		if textContentType != "" {
+			message.Show(msg, textContentType)
+		}
+	})
 
 	markAsReadBtn, err := gtk.ButtonNewFromIconName("mail-read", gtk.ICON_SIZE_BUTTON)
 	utils.HandleError(err)
@@ -70,14 +91,14 @@ func createMessageItem(c *client.Client, box *types.Inbox, message *types.Cached
 	markAsReadBtn.Connect("clicked", func() {
 		var newMessages []*types.CachedMailMessage
 		for _, m := range messages.Messages {
-			if m.ID != message.ID {
+			if m.ID != msg.ID {
 				newMessages = append(newMessages, m)
 			}
 		}
 		messages.Messages = newMessages
 		asyncLoad(mainContainer, c, box, messages)
 		go func() {
-			err := c.MarkMessageAsRead(box.ID, message.ID)
+			err := c.MarkMessageAsRead(box.ID, msg.ID)
 			if err != nil {
 				logger.Fatal(err)
 			}
@@ -86,21 +107,22 @@ func createMessageItem(c *client.Client, box *types.Inbox, message *types.Cached
 
 	markAsReadBtn.SetTooltipText("Mark as read")
 
-	openBtn, err := gtk.ButtonNewFromIconName("go-up", gtk.ICON_SIZE_BUTTON)
+	openBrowserBtn, err := gtk.ButtonNewFromIconName("go-up", gtk.ICON_SIZE_BUTTON)
 	utils.HandleError(err)
 
-	openBtn.SetTooltipText("Open inbox on browser")
-	openBtn.SetVAlign(gtk.ALIGN_CENTER)
+	openBrowserBtn.SetTooltipText("Open inbox on browser")
+	openBrowserBtn.SetVAlign(gtk.ALIGN_CENTER)
 
-	openBtn.Connect("clicked", func() {
+	openBrowserBtn.Connect("clicked", func() {
 		url := box.WebURL
 		// TODO: cross platform?
 		_ = exec.Command("xdg-open", url).Start()
 	})
 
 	container.PackStart(leftContainer, false, false, 1)
+	container.PackEnd(previewMailBtn, false, false, 1)
 	container.PackEnd(markAsReadBtn, false, false, 1)
-	container.PackEnd(openBtn, false, false, 1)
+	container.PackEnd(openBrowserBtn, false, false, 1)
 
 	return container
 }
