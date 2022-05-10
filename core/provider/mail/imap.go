@@ -3,7 +3,9 @@ package mail
 import (
 	"errors"
 	"fmt"
+	"io"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -90,6 +92,10 @@ func (m Mail) MarkMessageAsRead(id string) (err error) {
 	return
 }
 
+func readMessage(e *gomsg.Entity) ([]byte, error) {
+	return io.ReadAll(e.Body)
+}
+
 func (m Mail) FetchMessage(id string) (message provider.MailMessage, err error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
@@ -124,6 +130,43 @@ func (m Mail) FetchMessage(id string) (message provider.MailMessage, err error) 
 	e, err := gomsg.Read(body)
 	if err != nil {
 		return
+	}
+
+	contents := make(map[string][]byte)
+
+	if mpr := e.MultipartReader(); mpr != nil {
+		for {
+			var part *gomsg.Entity
+			part, err = mpr.NextPart()
+			if err != nil {
+				if errors.Is(err, io.EOF) {
+					break
+				}
+				return
+			}
+
+			contentType := part.Header.Get("Content-Type")
+			if !strings.HasPrefix(contentType, "text/") {
+				continue
+			}
+
+			var b []byte
+			b, err = readMessage(part)
+			if err != nil {
+				return
+			}
+			contents[contentType] = b
+		}
+	} else {
+		contentType := e.Header.Get("Content-Type")
+		if strings.HasPrefix(contentType, "text/") {
+			var b []byte
+			b, err = readMessage(e)
+			if err != nil {
+				return
+			}
+			contents[contentType] = b
+		}
 	}
 
 	mr := mail.NewReader(e)
@@ -162,11 +205,12 @@ func (m Mail) FetchMessage(id string) (message provider.MailMessage, err error) 
 	message = MailMessage{
 		id: id,
 		data: &mailMessageData{
-			date:    date,
-			from:    from,
-			to:      to,
-			subject: subject,
-			loaded:  true,
+			date:         date,
+			from:         from,
+			to:           to,
+			subject:      subject,
+			textContents: contents,
+			loaded:       true,
 		},
 	}
 
