@@ -1,12 +1,15 @@
 package gmail
 
 import (
+	"encoding/base64"
 	"fmt"
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 
+	"github.com/Pauloo27/logger"
 	"github.com/Pauloo27/mail-notifier/core/provider"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -62,6 +65,34 @@ func (m Gmail) FetchMessage(id string) (message provider.MailMessage, err error)
 	if err != nil {
 		return
 	}
+
+	contents := make(map[string][]byte)
+
+	if len(msg.Payload.Parts) == 0 {
+		contentType := msg.Payload.MimeType
+		if strings.HasPrefix(contentType, "text/") {
+			var b []byte
+			b, err = base64.URLEncoding.DecodeString(msg.Payload.Body.Data)
+			if err != nil {
+				return
+			}
+			contents[contentType] = b
+		}
+	} else {
+		for _, part := range msg.Payload.Parts {
+			contentType := part.MimeType
+			if strings.HasPrefix(contentType, "text/") {
+				var b []byte
+				b, err = base64.URLEncoding.DecodeString(part.Body.Data)
+				if err != nil {
+					logger.Error(err)
+					return
+				}
+				contents[contentType] = b
+			}
+		}
+	}
+
 	var from, subject string
 	var to []string
 	for _, m := range msg.Payload.Headers {
@@ -89,11 +120,12 @@ func (m Gmail) FetchMessage(id string) (message provider.MailMessage, err error)
 		id:   id,
 		mail: &m,
 		data: &gmailMessageData{
-			loaded:  true,
-			subject: subject,
-			from:    from,
-			to:      to,
-			date:    time.Unix(msg.InternalDate/1000, 0),
+			loaded:       true,
+			subject:      subject,
+			from:         from,
+			textContents: contents,
+			to:           to,
+			date:         time.Unix(msg.InternalDate/1000, 0),
 		},
 	}
 	return
