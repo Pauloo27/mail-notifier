@@ -20,7 +20,8 @@ func Show(msg *types.CachedMailMessage, contentType string) {
 	utils.HandleError(err)
 
 	mainContainer.PackStart(createHeader(msg, win), false, false, 5)
-	mainContainer.PackStart(createMessagePreview(msg, contentType), false, true, 5)
+	mainContainer.PackStart(createMessageHeaderPreview(msg, contentType), false, true, 5)
+	mainContainer.PackStart(createMessageContentPreview(msg, contentType), false, true, 5)
 
 	win.Add(mainContainer)
 

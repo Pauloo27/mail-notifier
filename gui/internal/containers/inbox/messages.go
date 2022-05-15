@@ -48,7 +48,7 @@ func createMessageItem(c *client.Client, box *types.Inbox, msg *types.CachedMail
 	container, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 5)
 	utils.HandleError(err)
 
-	leftContainer, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 5)
+	leftContainer, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 1)
 	utils.HandleError(err)
 
 	subjectLbl, err := gtk.LabelNew(utils.AddEllipsis(msg.Subject, 40))
@@ -61,8 +61,16 @@ func createMessageItem(c *client.Client, box *types.Inbox, msg *types.CachedMail
 	fromLbl.SetHAlign(gtk.ALIGN_START)
 	fromLbl.SetTooltipText(msg.From)
 
-	leftContainer.PackStart(subjectLbl, false, false, 1)
-	leftContainer.PackStart(fromLbl, false, false, 1)
+	date := msg.Date.Format("2006-01-02 03:04:05 PM")
+
+	dateLbl, err := gtk.LabelNew(date)
+	utils.HandleError(err)
+	dateLbl.SetHAlign(gtk.ALIGN_START)
+	dateLbl.SetTooltipText(date)
+
+	leftContainer.PackStart(subjectLbl, false, false, 0)
+	leftContainer.PackStart(fromLbl, false, false, 0)
+	leftContainer.PackStart(dateLbl, false, false, 0)
 
 	var textContentType string
 	for contentType := range msg.TextContents {
