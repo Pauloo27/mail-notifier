@@ -84,7 +84,10 @@ func createInboxList(c *client.Client) *gtk.ScrolledWindow {
 			logger.Fatal(err)
 		}
 
-		for i := range inboxes {
+		for i, inbox := range inboxes {
+			if inbox.Disabled {
+				continue
+			}
 			msgs, err := c.FetchUnreadMessagesIn(i)
 			messages = append(messages, msgs)
 			if err != nil {
@@ -94,8 +97,11 @@ func createInboxList(c *client.Client) *gtk.ScrolledWindow {
 
 		glib.IdleAdd(func() {
 			spinner.Destroy()
-			for i, m := range inboxes {
-				container.Attach(createInboxItem(c, m, messages[i]), 0, i, 1, 1)
+			for i, inbox := range inboxes {
+				if inbox.Disabled {
+					continue
+				}
+				container.Attach(createInboxItem(c, inbox, messages[i]), 0, i, 1, 1)
 			}
 			container.ShowAll()
 		})

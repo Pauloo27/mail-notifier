@@ -1,8 +1,9 @@
 package storage
 
 type ProviderConfig struct {
-	Type string                 `json:"type"`
-	Info map[string]interface{} `json:"info"`
+	Type     string                 `json:"type"`
+	Disabled bool                   `json:"disabled"`
+	Info     map[string]interface{} `json:"info"`
 }
 
 type Config struct {

@@ -35,6 +35,9 @@ func ConnectToInboxes() (err error) {
 		return ErrConfigNotLoaded
 	}
 	for i, p := range config.Providers {
+		if p.Disabled {
+			continue
+		}
 		inbox, err := provider.Factories[p.Type](p.Info)
 		if err != nil {
 			return err
