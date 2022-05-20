@@ -45,6 +45,7 @@ func createMessageContentPreview(msg *types.CachedMailMessage, contentType strin
 	textView, err := gtk.TextViewNewWithBuffer(textBuf)
 	utils.HandleError(err)
 	textView.SetWrapMode(gtk.WRAP_WORD_CHAR)
+	textView.SetEditable(false)
 
 	scroller.Add(textView)
 	scroller.SetVExpand(true)
