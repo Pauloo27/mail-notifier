@@ -24,6 +24,7 @@ type Gmail struct {
 	Service     *gmail.Service
 	mailAddress string
 	userID      int
+	hideSpam    bool
 }
 
 var (
@@ -32,7 +33,7 @@ var (
 
 func init() {
 	provider.Factories["gmail"] = func(info map[string]interface{}) (provider.MailBox, error) {
-		m, err := NewGmail(info["credentials"].(string), int(info["id"].(float64)))
+		m, err := NewGmail(info["credentials"].(string), int(info["id"].(float64)), info["hide_spam"].(bool))
 		if err != nil {
 			return nil, err
 		}
@@ -45,7 +46,7 @@ func init() {
 	}
 }
 
-func NewGmail(credentialsFilePath string, userID int) (*Gmail, error) {
+func NewGmail(credentialsFilePath string, userID int, hideSpam bool) (*Gmail, error) {
 	buf, err := os.ReadFile(credentialsFilePath)
 	if err != nil {
 		return nil, err
@@ -55,8 +56,9 @@ func NewGmail(credentialsFilePath string, userID int) (*Gmail, error) {
 		return nil, err
 	}
 	return &Gmail{
-		userID: userID,
-		Config: config,
+		hideSpam: hideSpam,
+		userID:   userID,
+		Config:   config,
 	}, nil
 }
 
@@ -147,7 +149,7 @@ func (m Gmail) MarkMessageAsRead(id string) (err error) {
 }
 
 func (m Gmail) FetchUnreadMessages() (messages []provider.MailMessage, err error) {
-	query := m.Service.Users.Messages.List("me").IncludeSpamTrash(true).LabelIds("UNREAD")
+	query := m.Service.Users.Messages.List("me").IncludeSpamTrash(!m.hideSpam).LabelIds("UNREAD")
 
 	res, err := query.Do()
 	if err != nil {
