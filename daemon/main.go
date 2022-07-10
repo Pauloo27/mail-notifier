@@ -7,6 +7,7 @@ import (
 
 	_ "github.com/Pauloo27/mail-notifier/core/provider/gmail"
 	_ "github.com/Pauloo27/mail-notifier/core/provider/mail"
+	_ "github.com/emersion/go-message/charset"
 )
 
 func main() {
