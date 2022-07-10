@@ -19,73 +19,6 @@ var (
 	unreadByInbox = make(map[int]int)
 )
 
-func printPending() {
-	btn := polybar.ActionButton{
-		Index:          polybar.LeftClick,
-		Display:        "Connecting...",
-		UnderlineColor: "#ffb86c",
-	}
-	fmt.Println(btn.String())
-}
-
-func printStatus(unreadCount int) {
-	color := "#50fa7b"
-	if unreadCount != 0 {
-		color = "#ffb86c"
-	}
-	coolButton := polybar.ActionButton{
-		Index:          polybar.LeftClick,
-		Display:        " : " + strconv.Itoa(unreadCount) + " unread",
-		UnderlineColor: color,
-		Command:        "mail-notifier-gui",
-	}
-	fmt.Println(coolButton.String())
-}
-
-func handleError(err error) {
-	if err == nil {
-		return
-	}
-	errBtn := polybar.ActionButton{
-		Index:          polybar.LeftClick,
-		Display:        "Error =(",
-		UnderlineColor: "#ff5555",
-	}
-	fmt.Println(errBtn)
-	logger.Fatal(err)
-}
-
-func mustListInboxes(client *client.Client) {
-	var err error
-	inboxes, err = client.ListInboxes()
-	handleError(err)
-}
-
-func mustFetchUnread(client *client.Client) (unread int) {
-	for i, inbox := range inboxes {
-		unreadMessages, err := client.FetchUnreadMessagesIn(inbox.ID)
-		handleError(err)
-		unreadByInbox[i] = len(unreadMessages.Messages)
-		unread += len(unreadMessages.Messages)
-	}
-	return
-}
-
-func mustListenToChanges(c *client.Client, ch chan int) {
-	c.OnInboxChanged = func(inboxID int, messages *types.CachedUnreadMessages) {
-		unreadByInbox[inboxID] = len(messages.Messages)
-		sum := 0
-		for _, unread := range unreadByInbox {
-			sum += unread
-		}
-		ch <- sum
-	}
-	for _, inbox := range inboxes {
-		err := c.ListenToInbox(inbox.ID)
-		handleError(err)
-	}
-}
-
 func init() {
 	tmpFolder := "/tmp/mail-notifier"
 	if _, err := os.Stat(tmpFolder); errors.Is(err, os.ErrNotExist) {
@@ -127,4 +60,71 @@ func main() {
 	for {
 		printStatus(<-ch)
 	}
+}
+
+func printPending() {
+	btn := polybar.ActionButton{
+		Index:          polybar.LeftClick,
+		Display:        "Connecting...",
+		UnderlineColor: "#ffb86c",
+	}
+	fmt.Println(btn.String())
+}
+
+func printStatus(unreadCount int) {
+	color := "#50fa7b"
+	if unreadCount != 0 {
+		color = "#ffb86c"
+	}
+	coolButton := polybar.ActionButton{
+		Index:          polybar.LeftClick,
+		Display:        " : " + strconv.Itoa(unreadCount) + " unread",
+		UnderlineColor: color,
+		Command:        "mail-notifier-gui",
+	}
+	fmt.Println(coolButton.String())
+}
+
+func mustListInboxes(client *client.Client) {
+	var err error
+	inboxes, err = client.ListInboxes()
+	handleError(err)
+}
+
+func mustFetchUnread(client *client.Client) (unread int) {
+	for i, inbox := range inboxes {
+		unreadMessages, err := client.FetchUnreadMessagesIn(inbox.ID)
+		handleError(err)
+		unreadByInbox[i] = len(unreadMessages.Messages)
+		unread += len(unreadMessages.Messages)
+	}
+	return
+}
+
+func mustListenToChanges(c *client.Client, ch chan int) {
+	c.OnInboxChanged = func(inboxID int, messages *types.CachedUnreadMessages) {
+		unreadByInbox[inboxID] = len(messages.Messages)
+		sum := 0
+		for _, unread := range unreadByInbox {
+			sum += unread
+		}
+		ch <- sum
+	}
+	for _, inbox := range inboxes {
+		err := c.ListenToInbox(inbox.ID)
+		handleError(err)
+	}
+}
+
+func handleError(err error) {
+	if err == nil {
+		return
+	}
+	errBtn := polybar.ActionButton{
+		Index:          polybar.LeftClick,
+		Display:        "Error =(",
+		UnderlineColor: "#ff5555",
+	}
+	fmt.Println(errBtn)
+	logger.Fatal(err)
 }
