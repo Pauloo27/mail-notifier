@@ -18,6 +18,8 @@ func createHeader(msg *types.CachedMailMessage, win *gtk.Window) *gtk.HeaderBar 
 	titleLbl, err := gtk.LabelNew(utils.AddEllipsis(msg.Subject, 30))
 	utils.HandleError(err)
 
+	titleLbl.SetTooltipText(msg.Subject)
+
 	closeBtn, err := gtk.ButtonNewFromIconName("go-previous", gtk.ICON_SIZE_BUTTON)
 	utils.HandleError(err)
 
