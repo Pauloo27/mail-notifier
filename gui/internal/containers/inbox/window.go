@@ -25,7 +25,7 @@ func Show(c *client.Client, box *types.Inbox, messages *types.CachedUnreadMessag
 
 	win.Add(mainContainer)
 
-	win.SetTitle("Mail notifier - Inbox")
+	win.SetTitle("Mail Notifier - Inbox")
 	win.SetDefaultSize(450, 500)
 	win.ShowAll()
 	gtk.Main()

@@ -25,7 +25,7 @@ func Show(msg *types.CachedMailMessage, contentType string) {
 
 	win.Add(mainContainer)
 
-	win.SetTitle("Mail notifier - Message")
+	win.SetTitle("Mail Notifier - Message")
 	win.SetDefaultSize(450, 500)
 	win.ShowAll()
 	gtk.Main()
